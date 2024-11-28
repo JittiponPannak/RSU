@@ -216,6 +216,7 @@ public class FoodOrderList extends javax.swing.JFrame {
     }//GEN-LAST:event_nextPageActionPerformed
 
     private void deleteMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteMenuActionPerformed
+        frame.orderedKeys.remove(page);
         data.menus.remove(page);
         data.amounts.remove(page);
         data.discounted.remove(page);
@@ -227,9 +228,9 @@ public class FoodOrderList extends javax.swing.JFrame {
     }//GEN-LAST:event_deleteMenuActionPerformed
 
     private void returnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_returnButtonActionPerformed
+        frame.clear();
         frame.setVisible(true);
         dispose();
-        Main.instance.setVisible(false);
     }//GEN-LAST:event_returnButtonActionPerformed
 
     private void orderStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_orderStartActionPerformed
@@ -239,12 +240,6 @@ public class FoodOrderList extends javax.swing.JFrame {
         frame.dispose();
         dispose();
     }//GEN-LAST:event_orderStartActionPerformed
-
-    @Override
-    public void dispose() {
-        super.dispose();
-        Main.instance.setVisible(true);
-    }
     
     /**
      * @param args the command line arguments
