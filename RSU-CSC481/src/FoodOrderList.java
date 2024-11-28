@@ -35,19 +35,21 @@ public class FoodOrderList extends javax.swing.JFrame {
 
     void setPage(int p) {
         try {
-            page = Math.clamp(p, 0, data.menus.size() - 1);
-            
-            Menu menu = data.menus.get(page);
-            
-            pageLabel.setText("%d / %d".formatted(page + 1, data.menus.size()));
-            pageDetail.setText("%s (%s) | ฿ %.2f × %d ชิ้น | ส่วนลด : %.2f | ราคา : ฿ %.2f".formatted(
-                    menu.name, menu.category.name,
-                    menu.price[data.types.get(page)], 
-                    data.amounts.get(page), 
-                    data.discounted.get(page), 
-                    data.totals.get(page)));
-            
-            menuPreview.setIcon(Utility.getImageFromURL(menu.pictureURL, menuPreview.getWidth(), menuPreview.getHeight()));
+            if (!data.menus.isEmpty()) {
+                page = Math.clamp(p, 0, data.menus.size() - 1);
+
+                Menu menu = data.menus.get(page);
+
+                pageLabel.setText("%d / %d".formatted(page + 1, data.menus.size()));
+                pageDetail.setText("%s (%s) | ฿ %.2f × %d ชิ้น | ส่วนลด : %.2f | ราคา : ฿ %.2f".formatted(
+                        menu.name, menu.category.name,
+                        menu.price[data.types.get(page)], 
+                        data.amounts.get(page), 
+                        data.discounted.get(page), 
+                        data.totals.get(page)));
+
+                menuPreview.setIcon(Utility.getImageFromURL(menu.pictureURL, menuPreview.getWidth(), menuPreview.getHeight()));
+            } else { frame.clear(); frame.setVisible(true); dispose(); }
         } catch (Exception e) { e.printStackTrace(); dispose(); }
     }
     void updatePrice() {
