@@ -47,6 +47,7 @@ public class Main extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(475, 300));
+        setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowActivated(java.awt.event.WindowEvent evt) {
                 formWindowActivated(evt);
@@ -195,12 +196,14 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_loginHintActionPerformed
 
     private void finalizeBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalizeBillActionPerformed
-        JOptionPane.showMessageDialog(null, "Thank you for Enjoying the Meals!");
-        recalcTotalActionPerformed(null);
-        Database.instance.finish();
-        
-        dispose();
-        new Main();
+        if (!Database.instance.details.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Thank you for Enjoying the Meals!");
+            recalcTotalActionPerformed(null);
+            Database.instance.finish();
+
+            dispose();
+            new Main();
+        }
     }//GEN-LAST:event_finalizeBillActionPerformed
 
     private void recalcTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recalcTotalActionPerformed

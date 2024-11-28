@@ -13,14 +13,14 @@ public class Utility {
                     image = imageCache.get(path);
                 } else {
                     image = new ImageIcon(c.getResource(path));
-                    image = new ImageIcon(image.getImage().getScaledInstance(
-                            width, height, java.awt.Image.SCALE_AREA_AVERAGING));
                     imageCache.put(path, image);
                 }
+                return new ImageIcon(image.getImage().getScaledInstance(
+                        width, height, java.awt.Image.SCALE_AREA_AVERAGING));
             }
         } catch (Exception e) { e.printStackTrace();}
         
-        return image;
+        return null;
     }
     static ImageIcon getImageFromURL(String path, int width, int height) {
         ImageIcon image = null;
@@ -33,13 +33,13 @@ public class Utility {
                     java.net.URL url = java.net.URI.create(path).toURL();
                     java.awt.image.BufferedImage c = javax.imageio.ImageIO.read(url);
                     image = new javax.swing.ImageIcon(c);
-                    image = new ImageIcon(image.getImage().getScaledInstance(
-                            width, height, java.awt.Image.SCALE_AREA_AVERAGING));
                     imageCache.put(path, image);
                 }
+                return new ImageIcon(image.getImage().getScaledInstance(
+                        width, height, java.awt.Image.SCALE_AREA_AVERAGING));
             }
         } catch (Exception e) { e.printStackTrace();}
         
-        return image;
+        return null;
     }    
 }

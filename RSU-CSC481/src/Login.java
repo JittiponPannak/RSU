@@ -49,6 +49,7 @@ public class Login extends javax.swing.JFrame {
         PhoneButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         QRLabel.setFont(new java.awt.Font("Angsana New", 0, 36)); // NOI18N
 

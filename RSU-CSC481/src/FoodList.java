@@ -50,6 +50,7 @@ public class FoodList extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
 
         jTable1.setFont(new java.awt.Font("Angsana New", 0, 16)); // NOI18N
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
