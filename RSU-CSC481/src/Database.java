@@ -65,6 +65,12 @@ public class Database {
             ps = connection.prepareStatement("SELECT * FROM Menu");
             rs = ps.executeQuery();
             
+            boolean preloadImages = javax.swing.JOptionPane.showConfirmDialog(null,
+                    "Do you want to preload all images? (Might Cause Lag)", "Database", 
+                    javax.swing.JOptionPane.YES_NO_OPTION) == javax.swing.JOptionPane.YES_OPTION;
+            
+            if (preloadImages) System.out.println("\nPreload Images\n");
+            
             while (rs.next()) {
                 String key = Menu.getUID(rs.getInt("CategoryID"), rs.getInt("MenuID"));
                 Menu menu;
@@ -82,6 +88,15 @@ public class Database {
                     menuTypePriceBuffer.put(menu, new ArrayList());
                     menuTypePriceBuffer.get(menu).add(rs.getDouble("MenuPrice"));
 
+                    if (preloadImages) {
+                        Thread.startVirtualThread(new java.lang.Runnable() {
+                            @Override public void run() {
+                                System.out.println(menu.pictureURL);
+                                Utility.getImageFromURL(menu.pictureURL);
+                            }
+                        });
+                    }
+                    
                     menus.add(menu);
                     menuMap.put(key, menu);
                 }
@@ -221,8 +236,8 @@ public class Database {
                 detail.discounted = discPrice;
                 
                 ps = connection.prepareStatement("INSERT INTO OrderDetail " +
-                    "(orderID, menuID, menuType,  menuCategoryID, menuQuantity, menuPriceTotal) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    "(orderID, menuID, menuType,  menuCategoryID, menuQuantity, menuPriceTotal, orderDiscounted) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
                 
                 ps.setInt(1, order.id);
                 ps.setInt(2, detail.menu.id);
@@ -230,7 +245,8 @@ public class Database {
                 ps.setInt(4, detail.menu.category.id);
                 ps.setInt(5, detail.amount);
                 ps.setDouble(6, detail.total);
-                
+                ps.setDouble(7, detail.discounted);
+
                 ps.executeUpdate();
                 
                 CancelableOrder co = new CancelableOrder(detail);
@@ -290,9 +306,10 @@ public class Database {
                 order.total = t;
                 order.discounted = d;
 
-                ps = connection.prepareStatement("UPDATE Orders SET orderTotal = ? WHERE orderID = ?");
+                ps = connection.prepareStatement("UPDATE Orders SET orderTotal = ?, orderDiscounted = ? WHERE orderID = ?");
                 ps.setDouble(1, order.total);
-                ps.setInt(2, order.id);
+                ps.setDouble(2, order.discounted);
+                ps.setInt(3, order.id);
                 ps.executeUpdate();
                 
         } catch (Exception e) { e.printStackTrace(); }
@@ -305,7 +322,7 @@ public class Database {
             recalculate();
             
            ps = connection.prepareStatement("UPDATE Orders SET orderPaid = ? WHERE orderID = ?");
-            ps.setDouble(1, order.total);
+            ps.setBoolean(1, true);
             ps.setInt(2, order.id);
             ps.executeUpdate();
             
@@ -316,13 +333,93 @@ public class Database {
             PreparedStatement ps;
             ResultSet rs;
             
-           ps = connection.prepareStatement("UPDATE Orders SET orderDateEnd = ? WHERE orderID = ?");
+            ps = connection.prepareStatement("UPDATE Orders SET orderDateEnd = ? WHERE orderID = ?");
             ps.setDate(1, java.sql.Date.valueOf(java.time.LocalDate.now().toString()));
             ps.setInt(2, order.id);
             ps.executeUpdate();
             
         } catch (Exception e) { e.printStackTrace(); }
     }
+    
+    boolean isOrderIDExisted(int id) {
+        boolean existed = false;
+        
+        try {
+            PreparedStatement ps;
+            ResultSet rs;
+            
+            ps = connection.prepareStatement("SELECT 1 FROM orders WHERE orderID = ?");
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+            
+            existed = rs.next();
+        } catch (Exception e) { e.printStackTrace(); }
+        return existed;
+    }
+    FullOrderData getOrderFromID(int id) {
+        try {
+            FullOrderData data = new FullOrderData();
+            PreparedStatement ps;
+            ResultSet rs;
+            
+            ps = connection.prepareStatement("SELECT * FROM orders WHERE orderID = ?");
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+            if (!rs.next()) { throw new Exception(); }
+            
+            data.order = new Order();
+            data.order.id = rs.getInt("orderID");
+            data.order.total = rs.getDouble("orderTotal");
+            data.order.discounted = rs.getDouble("orderDiscounted");
+            data.orderStart= rs.getDate("orderDateStart");
+            data.orderEnded = rs.getDate("orderDateEnd");
+            data.isPaid = rs.getBoolean("orderPaid");
+            data.canceled = rs.getBoolean("orderCanceled");
+            data.location = rs.getString("orderLocation");
+            data.table = rs.getInt("orderTable");
+            
+            int memberID = rs.getInt("memberID");
+            if (memberID != 0) {
+                ps = connection.prepareStatement("SELECT * FROM Member WHERE MemberID = ?");
+                ps.setInt(1, memberID);
+                rs = ps.executeQuery();
+                rs.next();
+                
+                data.order.member = new Member();
+                data.order.member.id = memberID;
+                data.order.member.name = rs.getString("MemberName");
+                data.order.member.phone = rs.getString("MemberPhone");
+            }
+            
+            ps = connection.prepareStatement("SELECT * FROM orderDetail WHERE orderID = ?");
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+            
+            ArrayList<OrderDetail> dt = new ArrayList();
+            while (rs.next()) {
+                OrderDetail detail = new OrderDetail();
+                
+                detail.id = rs.getInt("orderDetailID");
+                detail.menu = menuMap.get(Menu.getUID(
+                        rs.getInt("menuCategoryID") , 
+                        rs.getInt("menuID")));
+                detail.type = rs.getInt("menuType");
+                detail.amount = rs.getInt("menuQuantity");
+                detail.total = rs.getDouble("menuPriceTotal");
+                detail.discounted = rs.getDouble("orderDiscounted");
+                detail.canceled = rs.getBoolean("orderCanceled");
+                
+                dt.add(detail);
+            }
+            data.details = new OrderDetail[dt.size()];
+            for (int i = 0; i < dt.size(); i++)
+                data.details[i] = dt.get(i);
+            
+            return data;
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+    
     
     void clear() {
         order = null;
@@ -397,4 +494,15 @@ class CancelableOrder {
                         Main.instance.foodCancelFrame.dispose();
             }}, java.util.Date.from(java.time.Instant.now().plusSeconds(60 * Database.Canceltimeout)));
     }
+}
+class FullOrderData {
+    Order order;
+    OrderDetail[] details;
+    
+    java.sql.Date orderStart;
+    java.sql.Date orderEnded;
+    boolean isPaid;
+    boolean canceled;
+    String location;
+    int table;
 }

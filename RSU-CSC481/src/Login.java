@@ -47,6 +47,7 @@ public class Login extends javax.swing.JFrame {
         QRLabel = new javax.swing.JLabel();
         GuestButton = new javax.swing.JButton();
         PhoneButton = new javax.swing.JButton();
+        GuestButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -69,6 +70,14 @@ public class Login extends javax.swing.JFrame {
             }
         });
 
+        GuestButton1.setFont(new java.awt.Font("Angsana New", 0, 32)); // NOI18N
+        GuestButton1.setText("เรียกดูบิล");
+        GuestButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                GuestButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -78,7 +87,8 @@ public class Login extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(QRLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(PhoneButton, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(GuestButton, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(GuestButton, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(GuestButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -90,7 +100,9 @@ public class Login extends javax.swing.JFrame {
                 .addComponent(PhoneButton, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
                 .addComponent(GuestButton, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addGap(10, 10, 10)
+                .addComponent(GuestButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -101,12 +113,10 @@ public class Login extends javax.swing.JFrame {
         String phone = JOptionPane.showInputDialog("Input your Phone Number:");
         
         if (phone != null && !phone.isEmpty()) {
-            
             Database.instance.login(phone);
             
             Member member = Database.instance.order.member;
-            
-            if (member == null) {
+            if (Database.instance.order == null && member == null) {
                 JOptionPane.showMessageDialog(this, "Invalid", "Failed", JOptionPane.ERROR_MESSAGE);
             } else {
                 String message = "Welcome : %s (%s)".formatted(member.name, member.phone);
@@ -119,9 +129,12 @@ public class Login extends javax.swing.JFrame {
 
     private void GuestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuestButtonActionPerformed
         if (Database.instance.order == null) Database.instance.begin();
-        
         dispose();
     }//GEN-LAST:event_GuestButtonActionPerformed
+
+    private void GuestButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GuestButton1ActionPerformed
+        Bill.request(this);
+    }//GEN-LAST:event_GuestButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -160,6 +173,7 @@ public class Login extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton GuestButton;
+    private javax.swing.JButton GuestButton1;
     private javax.swing.JButton PhoneButton;
     private javax.swing.JLabel QRLabel;
     // End of variables declaration//GEN-END:variables

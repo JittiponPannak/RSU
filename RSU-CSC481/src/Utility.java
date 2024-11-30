@@ -22,7 +22,7 @@ public class Utility {
         
         return null;
     }
-    static ImageIcon getImageFromURL(String path, int width, int height) {
+    static ImageIcon getImageFromURL(String path) {
         ImageIcon image = null;
         
         try {
@@ -35,11 +35,38 @@ public class Utility {
                     image = new javax.swing.ImageIcon(c);
                     imageCache.put(path, image);
                 }
-                return new ImageIcon(image.getImage().getScaledInstance(
-                        width, height, java.awt.Image.SCALE_AREA_AVERAGING));
+                return image;
             }
         } catch (Exception e) { e.printStackTrace();}
         
         return null;
+    }
+    static ImageIcon getImageFromURL(String path, int width, int height) {
+        ImageIcon image = null;
+        
+        try {
+                image = getImageFromURL(path);
+                
+                int Cwidth = image.getImage().getWidth(image.getImageObserver());
+                int Cheight = image.getImage().getHeight(image.getImageObserver());
+                
+                if (Cwidth != width && Cheight != height) {
+                    image = new ImageIcon(image.getImage().getScaledInstance(
+                            width, height, java.awt.Image.SCALE_AREA_AVERAGING));
+                    imageCache.put(path, image);
+                }
+                
+                return image;
+        } catch (Exception e) { e.printStackTrace();}
+        
+        return null;
     }    
+    static void setImageToLabelFromURL(javax.swing.JLabel label, String path) {
+        Thread.startVirtualThread(new java.lang.Runnable() {
+            @Override public void run() {
+                label.setIcon(getImageLocal(label.getClass(), "/data/SampleQR.png", label.getWidth(), label.getHeight()));
+                label.setIcon(getImageFromURL(path));
+            }
+        });
+    }
 }
