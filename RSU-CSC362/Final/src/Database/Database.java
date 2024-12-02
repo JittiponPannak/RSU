@@ -400,6 +400,22 @@ public class Database {
             e.printStackTrace();
         }
     }
+    void updateItem(Item item) {
+        try {
+            PreparedStatement ps;
+            
+            ps = connection.prepareStatement("UPDATE Item SET itemName = ?, itemPrice = ?, itemAvailable = ? WHERE OrderID = ?");
+            
+            ps.setString(1, item.name);
+            ps.setDouble(2, item.price);
+            ps.setInt(3, item.available);
+            
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     
     Category requestNewCategory() {
         try {
