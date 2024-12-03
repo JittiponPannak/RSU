@@ -26,17 +26,19 @@ public class Reservation {
     void updatePrice() {
         total = 0.0f;
         
-        for (Court court : courts) {
-            if (customer instanceof GuestCustomer guest)
-                total += court.price + guest.reservationFee;
-            if (customer instanceof MemberCustomer member)
-                total += court.price * member.discountPercent;
-        }
+        for (Court court : courts)
+            total += court.price;
         
         if (dateStart != null && dateEnded != null) {
             long minutes = ChronoUnit.MINUTES.between(dateStart, dateEnded);
             double datePrice = (double) Math.ceilDiv(minutes, 60);
             total *= datePrice;
+        }
+        
+        if (customer instanceof GuestCustomer guest) {
+            total += guest.reservationFee;
+        } else if(customer instanceof MemberCustomer member) {
+            total *= member.discountPercent;
         }
     }
 

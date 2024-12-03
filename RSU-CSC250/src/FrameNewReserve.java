@@ -2,6 +2,7 @@
 import com.github.lgooddatepicker.optionalusertools.DateTimeChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateTimeChangeEvent;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
@@ -27,19 +28,26 @@ public class FrameNewReserve extends javax.swing.JFrame {
         dateBegin.addDateTimeChangeListener(new DateTimeChangeListener() {
             @Override public void dateOrTimeChanged(DateTimeChangeEvent dtce) {
                 LocalDateTime newDateTime = dateBegin.getDateTimePermissive();
-                if (newDateTime.isAfter(dateEnd.getDateTimePermissive())) {
+                
+                if (newDateTime.isBefore(LocalDateTime.now())) {
+                    newDateTime = LocalDateTime.now();
+                } else if (newDateTime.isAfter(dateEnd.getDateTimePermissive())) {
                     dateEnd.datePicker.setDate(newDateTime.toLocalDate());
                     dateEnd.timePicker.setTime(newDateTime.toLocalTime());
                 }
-                reservation.dateStart = dateBegin.getDateTimePermissive().toInstant(ZoneOffset.MAX);
-                reservation.dateEnded = dateEnd.getDateTimePermissive().toInstant(ZoneOffset.MAX);
+                
+                reservation.dateStart = dateBegin.getDateTimePermissive().atZone(ZoneId.of("Asia/Bangkok")).toInstant();
+                reservation.dateEnded = dateEnd.getDateTimePermissive().atZone(ZoneId.of("Asia/Bangkok")).toInstant();
+                
                 refreshTotal();
             }
         });
         dateEnd.addDateTimeChangeListener(new DateTimeChangeListener() {
             @Override public void dateOrTimeChanged(DateTimeChangeEvent dtce) {
                 LocalDateTime newDateTime = dateEnd.getDateTimePermissive();
-                if (newDateTime.isBefore(dateBegin.getDateTimePermissive())) {
+                if (newDateTime.isBefore(LocalDateTime.now())) {
+                    newDateTime = LocalDateTime.now();
+                } else if (newDateTime.isBefore(dateBegin.getDateTimePermissive())) {
                     dateBegin.datePicker.setDate(newDateTime.toLocalDate());
                     dateBegin.timePicker.setTime(newDateTime.toLocalTime());
                 }
@@ -48,6 +56,9 @@ public class FrameNewReserve extends javax.swing.JFrame {
                 refreshTotal();
             }
         });
+        
+        dateBegin.getDateTimeChangeListeners().get(0).dateOrTimeChanged(null);
+        dateEnd.getDateTimeChangeListeners().get(0).dateOrTimeChanged(null);
     }
     void refreshCourt() {
         courtListModel.removeAllElements();
@@ -56,6 +67,7 @@ public class FrameNewReserve extends javax.swing.JFrame {
     }
     void refreshTotal() {
         reservation.updatePrice();
+        totalField.setText("฿ %.2f".formatted(reservation.total));
     }
     
     @SuppressWarnings("unchecked")
@@ -78,7 +90,6 @@ public class FrameNewReserve extends javax.swing.JFrame {
         proceed = new javax.swing.JButton();
         courtAdd = new javax.swing.JButton();
         courtRemove = new javax.swing.JButton();
-        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -86,17 +97,17 @@ public class FrameNewReserve extends javax.swing.JFrame {
         customerField.setEditable(false);
         customerField.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
 
-        jLabel1.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         jLabel1.setText("Customer");
+        jLabel1.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
 
-        jLabel2.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         jLabel2.setText("Date Begin");
+        jLabel2.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
 
-        jLabel3.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         jLabel3.setText("Date Ended");
+        jLabel3.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
 
-        customerSelect.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         customerSelect.setText("Select");
+        customerSelect.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         customerSelect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 customerSelectActionPerformed(evt);
@@ -105,59 +116,62 @@ public class FrameNewReserve extends javax.swing.JFrame {
 
         dateBegin.datePicker.setDate(java.time.LocalDate.now());
         dateBegin.timePicker.setTime(java.time.LocalTime.now());
+        dateBegin.setFont(jLabel1.getFont());
+        dateBegin.datePicker.setFont(jLabel1.getFont());
+        dateBegin.timePicker.setFont(jLabel1.getFont());
 
         dateEnd.datePicker.setDate(java.time.LocalDate.now());
-        dateEnd.timePicker.setTime(java.time.LocalTime.now());
+        dateEnd.timePicker.setTime(java.time.LocalTime.now().plusHours(1));
 
-        jLabel4.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
+        dateEnd.setFont(jLabel1.getFont());
+        dateEnd.datePicker.setFont(jLabel1.getFont());
+        dateEnd.timePicker.setFont(jLabel1.getFont());
+
         jLabel4.setText("Total Cost");
+        jLabel4.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
 
         totalField.setEditable(false);
         totalField.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
 
-        courtList.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         courtList.setModel(courtListModel);
         courtList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        courtList.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         jScrollPane1.setViewportView(courtList);
 
-        jLabel5.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         jLabel5.setText("Courts");
+        jLabel5.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
 
-        cancel.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         cancel.setText("Cancel");
+        cancel.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         cancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelActionPerformed(evt);
             }
         });
 
-        proceed.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         proceed.setText("Proceed");
+        proceed.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         proceed.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 proceedActionPerformed(evt);
             }
         });
 
-        courtAdd.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         courtAdd.setText("Add");
+        courtAdd.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         courtAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 courtAddActionPerformed(evt);
             }
         });
 
-        courtRemove.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         courtRemove.setText("Remove");
+        courtRemove.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
         courtRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 courtRemoveActionPerformed(evt);
             }
         });
-
-        jLabel6.setFont(new java.awt.Font("Cordia New", 0, 18)); // NOI18N
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel6.setText("*Leave Empty For Guest");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -166,7 +180,6 @@ public class FrameNewReserve extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -210,8 +223,6 @@ public class FrameNewReserve extends javax.swing.JFrame {
                     .addComponent(customerField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(customerSelect))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(dateBegin, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -246,8 +257,12 @@ public class FrameNewReserve extends javax.swing.JFrame {
         setVisible(false);
         FrameNewReserve self = this;
         FrameMember frame = new FrameMember() { @Override public void dispose() {
-            self.reservation.customer = customer; self.setVisible(true); super.dispose();
-            if (customer != null) { customerField.setText("%s (%s)".formatted(customer.name, customer.phone)); }
+            self.reservation.customer = customer;
+            self.setVisible(true); super.dispose();
+            if (customer != null) {
+                customerField.setText("%s (%s)".formatted(customer.name, customer.phone));
+                refreshTotal();
+            }
         } };
         frame.setVisible(true);
     }//GEN-LAST:event_customerSelectActionPerformed
@@ -258,6 +273,7 @@ public class FrameNewReserve extends javax.swing.JFrame {
 
     private void proceedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proceedActionPerformed
         if (reservation.courts.isEmpty()) return;
+        if (reservation.customer == null)  return;
         if (reservation.dateStart == null)  return;
         if (reservation.dateEnded == null) return;
         
@@ -275,19 +291,24 @@ public class FrameNewReserve extends javax.swing.JFrame {
         try {
             if (input != null && !input.isEmpty())
                 key = Integer.parseInt(input);
+            if (key < 0 || key >= Main.courts.size()) {
+                JOptionPane.showMessageDialog(null, "Invalid Court ID", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             
-            
-            Court court = Main.courts.get(key); /*
+            Court court = Main.courts.get(key);
             if (reservation.courts.contains(court)) {
-                JOptionPane.showMessageDialog(null, "Already Added", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Already Added", "Error", JOptionPane.ERROR_MESSAGE); return;
             } else {
                 for (Reservation res : Main.reservations) {
-                if (!res.courts.contains(court) && (!res.dateStart.isBefore(reservation.dateStart) || !res.dateEnded.isAfter(reservation.dateEnded))) { return; }}
+                    if (res.courts.contains(court) && (reservation.dateStart.isAfter(res.dateStart) 
+                                                       && reservation.dateEnded.isBefore(res.dateEnded)))
+                    { JOptionPane.showMessageDialog(null, "Already Reserved At That Time", "Error", JOptionPane.ERROR_MESSAGE); return; }}
             }
-            */
             
             reservation.courts.add(court);
             refreshCourt();
+            refreshTotal();
         } catch (Exception e) { e.printStackTrace(); }
         
     }//GEN-LAST:event_courtAddActionPerformed
@@ -298,6 +319,7 @@ public class FrameNewReserve extends javax.swing.JFrame {
         
         reservation.courts.remove(selected);
         refreshCourt();
+        refreshTotal();
     }//GEN-LAST:event_courtRemoveActionPerformed
 
     /**
@@ -349,7 +371,6 @@ public class FrameNewReserve extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton proceed;
     private javax.swing.JTextField totalField;

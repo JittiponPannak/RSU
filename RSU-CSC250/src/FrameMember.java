@@ -170,27 +170,42 @@ public class FrameMember extends javax.swing.JFrame {
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
         int type = searchType.getSelectedIndex();
         String input = searchField.getText();
+        boolean found = false;
         
         if (input == null || input.isEmpty()) { return; }
+        
+        Customer customerLocal = null;
         
         for (Customer c : Main.customers) {
             if (type == 0) { // ID
                 int id; try { id = Integer.parseInt(input); } catch (Exception e) { break; }
-                if (c.id == id) { customer = c; newMember = false; memberCheck.setEnabled(false); memberCheck.setSelected(customer instanceof MemberCustomer);}
+                if (c.id == id) {
+                    customerLocal = c;
+                    
+                    newMember = false;
+                    found = true;
+                    
+                    memberCheck.setEnabled(false);
+                    memberCheck.setSelected(customerLocal instanceof MemberCustomer);
+                    break;
+                }
             } else if (type == 1 && c.phone.equals(input)) { // Phone
-                customer = c;
+                customerLocal = c;
+                
                 newMember = false;
+                found = true;
+                
                 memberCheck.setEnabled(false);
-                memberCheck.setSelected(customer instanceof MemberCustomer);
+                memberCheck.setSelected(customerLocal instanceof MemberCustomer);
                 break;
             }
         }
         
-        if (customer != null) {
-            customerID.setText("" + customer.id);
-            customerName.setText(customer.name);
-            customerPhone.setText(customer.phone);
-        }
+        customer = customerLocal;
+        
+        customerID.setText(customerLocal == null ? "" : "" + customer.id);
+        customerName.setText(customerLocal == null ? "" : customer.name);
+        customerPhone.setText(customerLocal == null ? "" : customer.phone);
     }//GEN-LAST:event_searchButtonActionPerformed
 
     private void customerNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_customerNewActionPerformed
@@ -210,7 +225,9 @@ public class FrameMember extends javax.swing.JFrame {
             if (customer.name == null || customer.name.isEmpty()) { return; }
             else if (customer.phone == null || customer.phone.isEmpty()) { return; }
             else { Main.customers.add(customer); }
-        } else {
+        }
+        
+        if (customer != null) {
             setVisible(false); dispose();
         }
     }//GEN-LAST:event_selectCustomerActionPerformed
