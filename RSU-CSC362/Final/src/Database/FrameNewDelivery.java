@@ -4,6 +4,7 @@
  */
 package Database;
 
+import static Database.FrameMain.instance;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,6 +19,8 @@ public class FrameNewDelivery extends javax.swing.JFrame {
     public FrameNewDelivery() {
         initComponents();
         itemModel.setRowCount(0);
+        Database.instance.refreshDelivery();
+        modeComboActionPerformed(null);     
     }
 
     @SuppressWarnings("unchecked")
@@ -29,6 +32,7 @@ public class FrameNewDelivery extends javax.swing.JFrame {
         itemTable = new javax.swing.JTable();
         modeCombo = new javax.swing.JComboBox<>();
         search3 = new javax.swing.JButton();
+        search4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -88,6 +92,14 @@ public class FrameNewDelivery extends javax.swing.JFrame {
             }
         });
 
+        search4.setFont(new java.awt.Font("Cordia New", 0, 36)); // NOI18N
+        search4.setText("ดูรายการ");
+        search4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                search4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -95,6 +107,7 @@ public class FrameNewDelivery extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(search4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(modeCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 450, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
@@ -107,13 +120,15 @@ public class FrameNewDelivery extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(modeCombo, javax.swing.GroupLayout.DEFAULT_SIZE, 53, Short.MAX_VALUE)
+                .addComponent(modeCombo)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(search3, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(search1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(search4, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -124,6 +139,7 @@ public class FrameNewDelivery extends javax.swing.JFrame {
     private void modeComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modeComboActionPerformed
         mode = modeCombo.getSelectedIndex();
         
+        itemModel.setRowCount(0);
         for (Delivery delivery : Database.instance.deliveries.values()) {
             switch (mode) {
                 case 0:
@@ -142,6 +158,8 @@ public class FrameNewDelivery extends javax.swing.JFrame {
         int id = itemTable.getSelectedRow();
         if (id != -1) {
             Database.instance.deliveries.get((int) itemTable.getValueAt(id, 0)).date = null;
+            Database.instance.updateDelivery(Database.instance.deliveries.get((int) itemTable.getValueAt(id, 0)));
+            
             modeComboActionPerformed(null);
         }
     }//GEN-LAST:event_search1ActionPerformed
@@ -149,10 +167,25 @@ public class FrameNewDelivery extends javax.swing.JFrame {
     private void search3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_search3ActionPerformed
         int id = itemTable.getSelectedRow();
         if (id != -1) {
-            Database.instance.deliveries.get((int)  itemTable.getValueAt(id, 0)).date = java.sql.Date.valueOf(java.time.LocalDate.now());
+            Database.instance.deliveries.get((int) itemTable.getValueAt(id, 0)).date = java.sql.Date.valueOf(java.time.LocalDate.now());
+            Database.instance.updateDelivery(Database.instance.deliveries.get((int) itemTable.getValueAt(id, 0)));
+            
             modeComboActionPerformed(null);
         }
     }//GEN-LAST:event_search3ActionPerformed
+
+    private void search4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_search4ActionPerformed
+        int id = itemTable.getSelectedRow();
+        if (id != -1) {
+            setVisible(false);
+            new FrameOrderList((int) itemTable.getValueAt(id, 1)){
+                @Override public void dispose() {
+                    instance.setVisible(true);
+                    super.dispose();
+                }
+            }.setVisible(true);
+        }
+    }//GEN-LAST:event_search4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -195,5 +228,6 @@ public class FrameNewDelivery extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> modeCombo;
     private javax.swing.JButton search1;
     private javax.swing.JButton search3;
+    private javax.swing.JButton search4;
     // End of variables declaration//GEN-END:variables
 }

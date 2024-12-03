@@ -23,12 +23,20 @@ public class FrameOrderList extends javax.swing.JFrame {
     public FrameOrderList() {
         initComponents();
     }
+    public FrameOrderList(int id) {
+        this();
+        orderIDField.setText("" + id);
+        orderViewActionPerformed(null);
+    }
     
     void updateTable() {
         try {
             Order order = Database.instance.orders.get(orderID);
             ArrayList<OrderDetail> details = new ArrayList<>();
             
+            if (order == null) { return; }
+            
+            itemModel.setRowCount(0);
             for (OrderDetail detail : Database.instance.details.values()) {
                 if (detail.orderID == order.id) {
                     details.add(detail);
@@ -170,16 +178,18 @@ public class FrameOrderList extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void orderViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_orderViewActionPerformed
-        try { orderID = Integer.parseInt(orderIDField.getText()); } catch (Exception e) { e.printStackTrace(); }
+        try { orderID = Integer.parseInt(orderIDField.getText()); } catch (Exception e) {}
         updateTable();
     }//GEN-LAST:event_orderViewActionPerformed
 
     private void orderPrevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_orderPrevActionPerformed
         orderID = Math.max(orderID - 1, 0); updateTable();
+        orderIDField.setText("" + orderID);
     }//GEN-LAST:event_orderPrevActionPerformed
 
     private void orderNextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_orderNextActionPerformed
         orderID = Math.min(orderID + 1, Database.instance.orders.size() - 1); updateTable();
+        orderIDField.setText("" + orderID);
     }//GEN-LAST:event_orderNextActionPerformed
 
     /**

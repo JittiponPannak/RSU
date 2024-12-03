@@ -168,7 +168,7 @@ public class Database {
         try {
             System.out.print("Refreshing Order Detail ...");
             
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM orderID WHERE orderID = ?");
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM ordersDetail WHERE orderID = ?");
             ps.setInt(1, orderID); ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -306,10 +306,14 @@ public class Database {
     void addOrderDetail(OrderDetail[] details) {
         try {
             for (OrderDetail detail : details) {
-                PreparedStatement ps = connection.prepareStatement("INSERT INTO OrderDetail (orderID, itemID, itemSubID, orderAmount, orderSubTotal) VALUES (?, ?, ?, ?, ?)");
+                PreparedStatement ps = connection.prepareStatement("INSERT INTO ordersDetail (orderID, itemID, itemSubID, orderAmount, orderSubTotal) VALUES (?, ?, ?, ?, ?)");
                 
+                System.out.println(detail.orderID);
+                System.out.println(detail.itemID);
+                System.out.println(detail.itemSubID);
+
                 ps.setInt(1, detail.orderID);
-                ps.setInt(2, detail.itemID);
+                ps.setInt(2, Math.max(1, detail.itemID));
                 ps.setInt(3, detail.itemSubID);
                 ps.setInt(4, detail.amount);
                 ps.setDouble(5, detail.subTotal);
@@ -388,7 +392,7 @@ public class Database {
             ps.executeUpdate();
             
             for (OrderDetail detail : details) {
-                ps = connection.prepareStatement("UPDATE OrderDetail SET orderAmount = ?, orderSubTotal = ? WHERE OrderID = ?");
+                ps = connection.prepareStatement("UPDATE ordersDetail SET orderAmount = ?, orderSubTotal = ? WHERE OrderID = ?");
                 
                 ps.setInt(1, detail.amount);
                 ps.setDouble(2, detail.subTotal);
@@ -404,11 +408,27 @@ public class Database {
         try {
             PreparedStatement ps;
             
-            ps = connection.prepareStatement("UPDATE Item SET itemName = ?, itemPrice = ?, itemAvailable = ? WHERE OrderID = ?");
+            ps = connection.prepareStatement("UPDATE Item SET itemName = ?, itemPrice = ?, itemAvailable = ? WHERE itemID = ? AND itemSubID = ?");
             
             ps.setString(1, item.name);
             ps.setDouble(2, item.price);
             ps.setInt(3, item.available);
+            ps.setDouble(4, item.id);
+            ps.setInt(5, item.subID);
+            
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    void updateDelivery(Delivery delivery) {
+        try {
+            PreparedStatement ps;
+            
+            ps = connection.prepareStatement("UPDATE Delivery SET deliveryDate = ? WHERE deliveryID = ?");
+            
+            ps.setDate(1, delivery.date);
+            ps.setInt(2, delivery.id);
             
             ps.executeUpdate();
         } catch (Exception e) {

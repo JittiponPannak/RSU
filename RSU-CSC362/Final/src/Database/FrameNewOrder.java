@@ -17,18 +17,25 @@ public class FrameNewOrder extends javax.swing.JFrame {
 
     DefaultTableModel itemModel;
     
-    Order order = Database.instance.requestNewOrder();
+    Order order;
     ArrayList<OrderDetail> details = new ArrayList();
     
     public FrameNewOrder() {
         initComponents();
         
+        order = Database.instance.requestNewOrder();
+        order.id = Database.instance.orders.size();
+        
         itemModel.setRowCount(0);
         itemModel.addTableModelListener(new TableModelListener() {
             @Override public void tableChanged(TableModelEvent e) {
                 int selectedRow = itemTable.getSelectedRow();
-                if (selectedRow != -1) {
-                    details.get(selectedRow).amount = (int) itemModel.getValueAt(selectedRow, 2);
+                if (selectedRow != -1 && selectedRow < itemModel.getRowCount()) {
+                    int amount = (int) itemModel.getValueAt(selectedRow, 2);
+                    if (amount <= 0)
+                        revItemActionPerformed(null);
+                    else
+                        details.get(selectedRow).amount = amount;
                 }
             }});
         
@@ -42,7 +49,7 @@ public class FrameNewOrder extends javax.swing.JFrame {
         for (OrderDetail detail : details) {
             Item item = Database.instance.items.get(Item.getUID(detail.itemID, detail.itemSubID));
             
-            detail.subTotal = item.price * detail.amount;;
+            detail.subTotal = item.price * detail.amount;
             order.total += detail.subTotal;
             
             itemModel.addRow(new Object[] { item.name, item.price, detail.amount, detail.subTotal });
@@ -76,6 +83,7 @@ public class FrameNewOrder extends javax.swing.JFrame {
         addItem = new javax.swing.JButton();
         revItem = new javax.swing.JButton();
         jCheckBox1 = new javax.swing.JCheckBox();
+        revItem1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -185,6 +193,14 @@ public class FrameNewOrder extends javax.swing.JFrame {
             }
         });
 
+        revItem1.setFont(new java.awt.Font("Cordia New", 0, 36)); // NOI18N
+        revItem1.setText("ราคา");
+        revItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                revItem1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -222,7 +238,9 @@ public class FrameNewOrder extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(revItem, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jCheckBox1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jCheckBox1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(revItem1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -244,7 +262,8 @@ public class FrameNewOrder extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(addItem, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(revItem, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jCheckBox1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jCheckBox1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(revItem1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -265,7 +284,9 @@ public class FrameNewOrder extends javax.swing.JFrame {
         FrameItemSelect selector = new FrameItemSelect() {
             @Override public void dispose() {
                 if (item != null) {
+                    
                     OrderDetail od = new OrderDetail();
+                    od.orderID = order.id;
                     od.itemID = item.id;
                     od.itemSubID = item.subID;
                     od.amount = 1;
@@ -302,13 +323,20 @@ public class FrameNewOrder extends javax.swing.JFrame {
         order.customerAddress = addressField.getText();
         order.date = java.sql.Date.valueOf(java.time.LocalDate.now());
         
+        Database.instance.addOrder(order);
+        Database.instance.addOrderDetail(details.toArray(new OrderDetail[details.size()]));
+        for (OrderDetail detail : details) {
+            Item item = Database.instance.items.get(Item.getUID(detail.itemID, detail.itemSubID));
+            item.available -= detail.amount;
+            Database.instance.updateItem(item);
+        }
+        
         if (jCheckBox1.isSelected()) {
             Delivery delivery = Database.instance.requestNewDelivery();
             delivery.orderID = order.id;
+            Database.instance.addDelivery(delivery);
         }
         
-        Database.instance.addOrder(order);
-        Database.instance.addOrderDetail(details.toArray(new OrderDetail[details.size()]));
         
         dispose();
     }//GEN-LAST:event_search2ActionPerformed
@@ -316,6 +344,26 @@ public class FrameNewOrder extends javax.swing.JFrame {
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
         
     }//GEN-LAST:event_jCheckBox1ActionPerformed
+
+    private void revItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_revItem1ActionPerformed
+        double total = 0.0f;
+        for (int i = 0; i < itemModel.getRowCount();i++) {
+            OrderDetail detail = details.get(i);
+            Item item = Database.instance.items.get(Item.getUID(detail.itemID, detail.itemSubID));
+            int amount = Math.clamp((int) itemModel.getValueAt(i, 2), 0, item.available);
+            
+            double subTotal = item.price * amount;
+            total += subTotal;
+            
+            itemModel.setValueAt(amount, i, 2);
+            itemModel.setValueAt(subTotal, i, 3);
+            
+            detail.amount = amount;
+            detail.subTotal = subTotal;
+        }
+        order.total = total;
+        totalField.setText("฿ " + order.total);
+    }//GEN-LAST:event_revItem1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -367,6 +415,7 @@ public class FrameNewOrder extends javax.swing.JFrame {
     private javax.swing.JTextField nameField;
     private javax.swing.JTextField phoneField;
     private javax.swing.JButton revItem;
+    private javax.swing.JButton revItem1;
     private javax.swing.JButton search1;
     private javax.swing.JButton search2;
     private javax.swing.JTextField totalField;
