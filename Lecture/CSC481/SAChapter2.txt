@@ -1,0 +1,26 @@
+1 : SWOT Analysis
+2 : False
+3 : True
+4 : Reduced Cost
+Better Performance
+More Information
+5 : Internal Factors :
+User Request
+Top Managers
+
+External Factors : 
+Technology
+Customer
+The Economy
+6 : is a group of key managers and users who evaluate systems requests.
+7 : 1. Identify and weed out systems requests that are not feasible
+2. Even if the request is feasible, it might not be necessary
+3. Feasibility analysis is an ongoing task that must be performed throughout the systems development process
+8 : intangible
+9 : 1. Understand the Problem or Opportunity
+2. Define the Project Scope and Constraints
+3. Perform Fact-Finding
+4.Analyze Project Usability, Cost, Benefit, and Schedule Data
+10 : The order entry system must run in a UNIX environment
+11 : The human resources system interface with the current accounting system
+12 : The inventory system must be operational by next week

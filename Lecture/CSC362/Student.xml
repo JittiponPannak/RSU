@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataroot xmlns:od="urn:schemas-microsoft-com:officedata" generated="2024-08-21T10:54:28">
+<Student>
+<sID>6601000</sID>
+<sName>จิตติภณ</sName>
+<sLastname>พยานาค</sLastname>
+<sBirthdate>2004-04-01T00:00:00</sBirthdate>
+<sPicture>G:\CSC362\fbird.jfif</sPicture>
+</Student>
+<Student>
+<sID>6601001</sID>
+<sName>สมชาย</sName>
+<sLastname>ชายสม</sLastname>
+<sBirthdate>1969-04-20T00:00:00</sBirthdate>
+</Student>
+<Student>
+<sID>6601002</sID>
+<sName>ชื่อจริง</sName>
+<sLastname>นามสกุลจริง</sLastname>
+<sBirthdate>2069-06-09T00:00:00</sBirthdate>
+<sPicture>G:\CSC362\doggo.jfif</sPicture>
+</Student>
+</dataroot>
