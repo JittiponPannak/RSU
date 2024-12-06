@@ -22,10 +22,43 @@ public class Main {
     LinkedList<SubOrder> orderServingQueue = new LinkedList();
 
     static Main instance = new Main();
+    public static void main(String[] args) {}
+    
     public Main() {
-        java.io.File tableFile = new java.io.File("src/table.csv");
-        java.io.File foodFile = new java.io.File("src/food.csv");
+        int customLoad = javax.swing.JOptionPane.showConfirmDialog(
+                null, "Do you want to Custom Load?", 
+                "Loader", javax.swing.JOptionPane.YES_NO_OPTION);
+        
+        java.io.File tableFile = null;
+        java.io.File foodFile = null;
         java.util.Scanner sc;
+        
+        if (customLoad == javax.swing.JOptionPane.YES_OPTION) {
+            javax.swing.JFileChooser fc = new javax.swing.JFileChooser(new java.io.File("src/"));
+            fc.setAcceptAllFileFilterUsed(false);
+            fc.addChoosableFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV File", "csv"));
+            int result;
+            
+            javax.swing.JOptionPane.showMessageDialog(null, "Table File");
+            while (tableFile == null) {
+                result = fc.showOpenDialog(null);
+                if (result == javax.swing.JFileChooser.APPROVE_OPTION) {
+                    tableFile = fc.getSelectedFile();
+                }
+            }
+            
+            javax.swing.JOptionPane.showMessageDialog(null, "Food File");
+            while (foodFile == null) {
+                result = fc.showOpenDialog(null);
+                if (result == javax.swing.JFileChooser.APPROVE_OPTION) {
+                    foodFile = fc.getSelectedFile();
+                }
+            }
+            
+        } else {
+            tableFile = new java.io.File("src/table.csv");
+            foodFile = new java.io.File("src/food.csv");
+        }
         
         try {
             sc = new java.util.Scanner(tableFile);
@@ -54,6 +87,7 @@ public class Main {
                 availableFood.add(food);
             }
         } catch (Exception e) { e.printStackTrace(); }
+        new FrameMain().setVisible(true);
     }
     
     int customerEnqueue() {
@@ -85,12 +119,15 @@ public class Main {
             timer = new java.util.Timer();
             timer.scheduleAtFixedRate(new java.util.TimerTask() {
                 @Override public void run() {
-                    for (int i = 0; i < 10; i++) {
-                        if (orderServingQueue.isEmpty()) { break; }
-                        if (rng.nextBoolean()) { orderServingQueue.pop(); }
+                    if (!orderServingQueue.isEmpty()) { 
+                        if (rng.nextBoolean()) {
+                            SubOrder sO = orderServingQueue.pop();
+                            System.out.println("%s - %s has been served.".formatted(sO.table, sO.food.name));
+                            ((FrameMain) FrameManager.instance.list.lastElement()).refresh();
+                        }
                     }
                 }
-            }, 1000 * 30, 1000 * 30);
+            }, 0, 1000 * 30);
         }
     }
 }

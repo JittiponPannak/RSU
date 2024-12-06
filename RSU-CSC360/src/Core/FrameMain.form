@@ -41,23 +41,16 @@
                       <Component id="jScrollPane1" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
-                                  <Component id="queueLabel" pref="210" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="orderListToLeftButton" alignment="0" min="-2" pref="91" max="-2" attributes="0"/>
-                                  <Component id="orderListToRightButton" alignment="0" min="-2" pref="91" max="-2" attributes="0"/>
-                                  <Component id="orderListServeButton" alignment="0" min="-2" pref="91" max="-2" attributes="0"/>
-                              </Group>
-                          </Group>
-                          <Group type="102" attributes="0">
-                              <EmptySpace min="216" pref="216" max="-2" attributes="0"/>
-                              <Component id="orderListCancelButton" min="-2" pref="91" max="-2" attributes="0"/>
-                          </Group>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
+                          <Component id="queueLabel" pref="210" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="orderListToLeftButton" pref="91" max="32767" attributes="0"/>
+                          <Component id="orderListToRightButton" pref="91" max="32767" attributes="0"/>
+                          <Component id="orderListServeButton" pref="91" max="32767" attributes="0"/>
+                          <Component id="orderListCancelButton" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -200,7 +193,7 @@
       <SubComponents>
         <Component class="javax.swing.JList" name="orderPreparingList">
           <Properties>
-            <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+            <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor" postCode="orderPreparingList.setFixedCellHeight(25);">
               <Connection code="orderPrepareModel" type="code"/>
             </Property>
             <Property name="selectionMode" type="int" value="0"/>
@@ -221,7 +214,7 @@
       <SubComponents>
         <Component class="javax.swing.JList" name="orderReadyList">
           <Properties>
-            <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+            <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor" postCode="orderReadyList.setFixedCellHeight(25);">
               <Connection code="orderReadyModel" type="code"/>
             </Property>
             <Property name="selectionMode" type="int" value="0"/>

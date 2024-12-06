@@ -22,7 +22,6 @@ public class FrameMain extends javax.swing.JFrame {
      */
     public FrameMain() {
         FrameManager.instance = new FrameManager(this);
-        
         initComponents();
     }
     
@@ -132,11 +131,13 @@ public class FrameMain extends javax.swing.JFrame {
         }
 
         orderPreparingList.setModel(orderPrepareModel);
+        orderPreparingList.setFixedCellHeight(25);
         orderPreparingList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         orderPreparingList.setToolTipText("");
         jScrollPane2.setViewportView(orderPreparingList);
 
         orderReadyList.setModel(orderReadyModel);
+        orderReadyList.setFixedCellHeight(25);
         orderReadyList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         orderReadyList.setToolTipText("");
         jScrollPane3.setViewportView(orderReadyList);
@@ -214,19 +215,15 @@ public class FrameMain extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                                    .addComponent(queueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(orderListToLeftButton, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(orderListToRightButton, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(orderListServeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(216, 216, 216)
-                                .addComponent(orderListCancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(queueLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(orderListToLeftButton, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+                            .addComponent(orderListToRightButton, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+                            .addComponent(orderListServeButton, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+                            .addComponent(orderListCancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -333,7 +330,11 @@ public class FrameMain extends javax.swing.JFrame {
     private void orderButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_orderButton1ActionPerformed
         int selectedRow = tableTable.getSelectedRow();
         if (selectedRow >= 0) {
-            FrameManager.instance.next(new FrameFinalize((String) tableTable.getValueAt(selectedRow, 0)));
+            String tbName = (String) tableTable.getValueAt(selectedRow, 0);
+            Table table = Main.instance.tables.get(tbName);
+            
+            if (!Main.instance.availableTable.contains(table))
+                FrameManager.instance.next(new FrameFinalize(tbName));
         }
     }//GEN-LAST:event_orderButton1ActionPerformed
 
