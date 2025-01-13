@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Class 2</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        function homework_pressed() {
+            document.location.href = "homework.html";
+        }
+    </script>
+</head>
+<body>
+    <div class="box">
+        <h1>Login</h1>
+    </div>
+
+    <form><div class="box">
+        <label for="username"> Username </label><br/>
+        <input id="username" name="username" type="text">
+        
+        <br/><br/>
+        
+        <label for="password"> Password </label><br/>
+        <input id="password" name="password" type="password">
+        
+        <br/><br/>
+
+        <input id="remember" name="remember" type="checkbox">
+        <label for="remember"> Remember Me </label>
+        
+        <br/><br/>
+
+        <input id="proceed" name="proceed" type="button" value="Proceed">
+        <input id="reset" name="reset" type="reset" value="Reset">
+    </div></form>
+    
+    <div class="box">
+        <h2>Homework</h2>
+        <form>
+            <input id="homework" name="homework" type="button"
+            value="Go To Homework" onclick="homework_pressed()">
+        </form>
+    </div>
+
+</body>
+</html>
