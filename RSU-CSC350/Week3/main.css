@@ -1,0 +1,35 @@
+body {
+    background-color: cornsilk;
+    margin: 0;
+}
+
+.navMenu {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: steelblue;
+    list-style-type: none;
+}
+
+.navItem {
+    float: left
+}
+
+.navItem a {
+    color: white;
+    display: block;
+    padding: 15px 15px;
+    text-align: center;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.imageCard {
+    width: 450px;
+    height: 300px;
+    justify-content: center;
+}
