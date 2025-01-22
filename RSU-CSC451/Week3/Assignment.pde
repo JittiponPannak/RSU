@@ -1,4 +1,26 @@
 void assignment() {
+  // 6606405 Jittipon Pannak
+  background(255, 255, 255, 255);
+  
+  colorMode(HSB, 360, 100, 100);
+  strokeWeight(5);
+  noClip();
+  
+  float halfWidth = width / 2.0;
+  float halfHeight = height / 2.0;
+  int size = 200;
+  
+  for (int radius = 0; radius < size; radius++) {
+    for (float angle = 0; angle <= TWO_PI; angle += 0.005) {
+      float x = radius * cos(angle) + halfWidth;
+      float y = radius * sin(angle) + halfHeight;
+      float hue = map(angle, 0, TWO_PI, 0, 360);
+      
+      stroke(hue, radius, 100);
+      point(x, y);
+    }
+  }
+  
 }
 
 void assignmentOld() {
