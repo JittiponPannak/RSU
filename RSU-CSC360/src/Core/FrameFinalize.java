@@ -22,6 +22,19 @@ public class FrameFinalize extends javax.swing.JFrame {
     }
     public FrameFinalize(String table) {
         this();
+        tableLabel.setText("Table : %s".formatted(table));
+        
+        Table tab = Main.instance.tables.get(table);
+        Order order = Main.instance.orders.get(tab);
+        double total = 0.0f;
+        
+        for (SubOrder subO : order.servedOrders) {
+            foodTableModel.addRow(new Object[] { subO.food.name, subO.food.price ,
+                               subO.amount, subO.discount, subO.food.price * subO.amount });
+            total += subO.amount * subO.food.price;
+        }
+        
+        totalField.setText("฿ %.0f".formatted(total));
     }
     
     /**
@@ -41,7 +54,7 @@ public class FrameFinalize extends javax.swing.JFrame {
         cancelButton = new javax.swing.JButton();
         proceedButton = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         foodOrderTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -138,6 +151,7 @@ public class FrameFinalize extends javax.swing.JFrame {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed

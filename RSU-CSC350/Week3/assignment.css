@@ -1,0 +1,29 @@
+body {
+    background: rgb(165,209,255);
+    background: radial-gradient(circle, rgba(165,209,255,1) 0%, rgba(225,160,255,1) 100%);
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.containerItem {
+    background: rgb(2,0,36);
+    background: linear-gradient(34deg, rgba(2,0,36,0.75) 0%, rgba(128,43,43,0.75) 100%);
+    color: white;
+    
+    width: 350px;
+    text-align: center;
+    flex-wrap: wrap;
+    border-radius: 30px;
+    margin: 25px;
+    padding: 50px;
+}
+.containerItemImage {
+    width: 250px;
+    height: 350px;
+}
+.containerItemDescription {
+    text-align: left;
+}
