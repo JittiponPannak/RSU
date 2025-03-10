@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "Bo Burnham: what. (2013)",
+    "picture": "https://upload.wikimedia.org/wikipedia/en/c/c4/Bo_Burnham_what.jpeg",
+    "description": "what. is a 2013 stand-up comedy routine and third album by American comedian and musician Bo Burnham. It is his first show following his 2010 comedy special Words Words Words. Like the majority of Burnham's live work, the show consists of musical comedy, prop comedy, miming, observational jokes, and the inversion of established comedy clichés. It received positive reviews.",
+    "score": "8/10",
+    "source": "https://en.wikipedia.org/wiki/What."
+  },
+  {
+    "id": 2,
+    "name": "Bo Burnham: Make Happy (2016)",
+    "picture": "https://upload.wikimedia.org/wikipedia/en/2/25/Bo_Burnham%2C_Make_Happy_%28poster%29.png",
+    "description": "Make Happy is a stand-up comedy routine written and performed by Bo Burnham which he performed live in 2015 and 2016. It was directed by Burnham and Chris Storer and a recording of the show was released on Netflix on June 3, 2016. Similar to Burnham's previous special what., the show is a specifically choreographed performance that combines comedy with music and uses pre-recorded music, stage lighting effects, and sound effects. It has received an overwhelmingly positive critical response, with several critics complimenting Burnham's deconstruction of various types of performances, clever jokes based on misdirection, and his stage persona.",
+    "score": "8/10",
+    "source": "https://en.wikipedia.org/wiki/Make_Happy"
+  },
+  {
+    "id": 3,
+    "name": "Bo Burnham: Inside (2021)",
+    "picture": "https://upload.wikimedia.org/wikipedia/en/e/e1/Bo_Burnham_-_Inside.jpg",
+    "description": "Bo Burnham: Inside is a 2021 musical special written, directed, filmed, edited, and performed by American comedian Bo Burnham.[1] Created alone by Burnham in the guest house of his Los Angeles home during the COVID-19 pandemic, it was released on Netflix on May 30, 2021. Featuring a variety of songs and sketches about his day-to-day life indoors, it depicts Burnham's deteriorating mental health, explores themes of performativity and his relationship to the internet and the audience it helped him reach, and addresses topics such as climate change and social movements. Other segments discuss online activities such as FaceTiming one's mother, posting on Instagram, sexting, and livestreaming video games.",
+    "score": "9/10",
+    "source": "https://en.wikipedia.org/wiki/Bo_Burnham:_Inside"
+  },
+  {
+    "id": 4,
+    "name": "Scott Pilgrim vs. the World (2010)",
+    "picture": "https://upload.wikimedia.org/wikipedia/en/1/14/Scott_Pilgrim_vs._the_World_teaser.jpg",
+    "description": "Scott Pilgrim vs. the World[a] is a 2010 romantic action comedy film co-written, produced and directed by Edgar Wright, based on the graphic novel series Scott Pilgrim by Bryan Lee O'Malley. It stars an ensemble cast, with Michael Cera as Scott Pilgrim, a slacker musician who is trying to win a competition to get a record deal, while also battling the seven evil exes of his new girlfriend Ramona Flowers, played by Mary Elizabeth Winstead.",
+    "score": "8/10",
+    "source": "https://en.wikipedia.org/wiki/Scott_Pilgrim_vs._the_World"
+  },
+  {
+    "id": 5,
+    "name": "Nobody (2021)",
+    "picture": "https://upload.wikimedia.org/wikipedia/en/c/c7/Nobody_2021_Film_Poster.jpeg",
+    "description": "Nobody is a 2021 American action thriller film directed by Ilya Naishuller and written by Derek Kolstad. It stars Bob Odenkirk as a mild-mannered family man who returns to his former life of an assassin after his family and he become the target of a vengeful crime lord. Connie Nielsen, RZA, and Christopher Lloyd appear in supporting roles. Odenkirk and David Leitch are among the film's producers.",
+    "score": "6/10",
+    "source": "https://en.wikipedia.org/wiki/Nobody_(2021_film)"
+  }
+]
