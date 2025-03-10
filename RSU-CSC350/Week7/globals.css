@@ -1,0 +1,29 @@
+body {
+  background: rgb(255,241,185);
+  background: radial-gradient(circle, rgba(255,241,185,1) 0%, rgba(255,255,255,1) 80%);
+}
+
+body {
+  padding: 250;
+  margin: 100;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: auto;
+  width: 75%;
+  gap: 75px;
+}
+
+.center {
+  text-align: center;
+}
+
+.centerMargined {
+  text-align: center;
+  flex-wrap: wrap;
+  margin: auto;
+  width: 40%;
+  gap: 80px;
+}
