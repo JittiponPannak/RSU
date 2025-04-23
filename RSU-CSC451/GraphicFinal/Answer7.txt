@@ -1,0 +1,75 @@
+final PImage[] catImages = new PImage[8];
+boolean lookLeft = true;
+int animF, animD;
+float catX, catY;
+int catWalk;
+
+void setup() {
+  size(640, 480);
+  
+  catImages[0] = loadImage("cat1.png");
+  catImages[1] = loadImage("cat2.png");
+  catImages[2] = loadImage("cat3.png");
+  catImages[3] = loadImage("cat4.png");
+  catImages[4] = flipImage(loadImage("cat1.png"));
+  catImages[5] = flipImage(loadImage("cat2.png"));
+  catImages[6] = flipImage(loadImage("cat3.png"));
+  catImages[7] = flipImage(loadImage("cat4.png"));
+  
+   catX = width / 2; catY = height / 2;
+}
+void draw() {
+  background(255);
+  
+  if (pmouseX != mouseX) {
+    if (pmouseX > mouseX) {
+      lookLeft = true;
+      catWalk = -1;
+    } else {
+      lookLeft = false;
+      catWalk = 1;
+    }
+  }
+  
+  if (animD <= 0) {
+    animD = 10;
+    animF = (animF + 1) % 4;
+  } else {
+    animD--;
+  }
+  
+  int animFF = animF;
+  if (!lookLeft) {
+    animFF += 4;
+  }
+  
+  catX += catWalk;
+  image(catImages[animFF], catX, catY);
+}
+void keyPressed() {
+  if (keyCode == LEFT) {
+    lookLeft = true;
+    catWalk = -1;
+  }
+  if (keyCode == RIGHT) {
+    lookLeft = false;
+    catWalk = 1;
+  }
+}
+
+PImage flipImage(PImage image) {
+  image = image.copy();
+  
+  for (int y = 0; y < image.height; y++) {
+    for (int x = image.width / 2; x > 0; x--) {
+      int a = image.width - x;
+      
+      color cX = image.get(x, y);
+      color cY = image.get(a, y);
+      image.set(x, y, cY);
+      image.set(a, y, cX);
+      }
+  }
+  
+  return image;
+}

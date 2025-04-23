@@ -1,0 +1,11 @@
+background(255, 0, 0);
+colorMode(RGB, 50);
+colorMode(RGB, 1.0);
+sin(100);
+constrain(x, 0, width);
+map(75, 0, 100, 0, 200);
+dist(width, height, mouseX, mouseY);
+translate(width, height);
+scale(0.5, 0.5)
+rotate(270);
+

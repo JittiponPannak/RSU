@@ -1,0 +1,68 @@
+final String imagePath = "RSU_logo.jpg";
+
+void setup() {
+  size(600, 800);
+  
+  PImage im = loadImage(imagePath);  
+  im.resize(width/2, height/2);
+  
+  image(im, 0, 0);
+  
+  negative();
+  gray();
+  sepia();
+}
+
+void negative() {
+  PImage im = loadImage(imagePath);  
+  
+  im.resize(width/2, height/2);
+  im.loadPixels();  
+  
+  for (int i = 0; i < im.pixels.length; i++) {
+    color c = im.pixels[i];
+    im.pixels[i] = color(255-red(c), 255-green(c), 255-blue(c));
+  }
+ 
+ im.updatePixels();
+ 
+ image(im, width/2, 0);
+}
+
+void gray() {
+  PImage im = loadImage(imagePath);  
+  
+  im.resize(width/2, height/2);
+  im.loadPixels();  
+  
+  for (int i = 0; i < im.pixels.length; i++) {
+    color c = im.pixels[i];
+    im.pixels[i] = color(red(c)*0.3 + green(c)*0.59 + blue(c)*0.11);
+  }
+  
+  im.updatePixels();
+  
+  image(im, 0, height/2);
+}
+
+void sepia() {
+  PImage im = loadImage(imagePath);  
+  
+  im.resize(width/2, height/2);
+  im.loadPixels();  
+  
+  for (int i = 0; i < im.pixels.length; i++)
+    im.pixels[i] = sepia(im.pixels[i]);
+  
+  im.updatePixels();
+  
+  image(im, width/2, height/2);
+}
+
+color sepia(color c) {
+  float r = red(c)*0.393 + green(c)*0.769 + blue(c)*0.189;
+  float g = red(c)*0.349 + green(c)*0.686 + blue(c)*0.168;
+  float b = red(c)*0.272 + green(c)*0.534 + blue(c)*0.131;
+  
+  return color(r, g, b);
+}

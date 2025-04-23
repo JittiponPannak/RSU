@@ -1,0 +1,23 @@
+int threshold = 730;
+size(800, 400);
+
+PImage im1 = loadImage("DIT_logo.jpg");
+im1.resize(width/2, height);
+background(255, 255, 0);
+image(im1, 0, 0);
+
+PImage im2 = createImage(im1.width, im1.height, ARGB);
+
+im1.loadPixels();
+im2.loadPixels();
+for (int i = 0; i < im1.pixels.length; i++) {
+  float r = red(im1.pixels[i]);
+  float g = green(im1.pixels[i]);
+  float b = blue(im1.pixels[i]);
+  if ((r + g + b) > threshold) 
+      im2.pixels[i] = color(r, g, b, 0);
+   else
+      im2.pixels[i] = color(r, g, b, 255);
+}
+im2.updatePixels();
+image(im2, im1.width, 0);

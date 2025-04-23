@@ -1,0 +1,60 @@
+PImage im1, im2;
+String msg = "Press: 0 -> 7";
+
+void setup() {
+  size(400, 400);
+  
+  im1 = loadImage("CS_logo.png");
+  im1.resize(width, height);
+  
+  textSize(20);
+  noLoop();
+}
+
+int filter = NORMAL;
+float arg = 0.0;
+
+void draw() {
+  im2 = createImage(im1.width, im1.height, RGB);
+  im2.copy(im1, 0, 0, width, height, 0, 0, width, height);
+
+  if (arg > 0)
+    im2.filter(filter, arg);
+  else
+    im2.filter(filter);
+  
+  image(im2, 0, 0);
+  text(msg, width/2, 25);
+  
+  arg = 0.0;
+}
+
+void keyPressed() {
+  if (key == '0') {
+    filter = NORMAL;
+    msg = "Press: 0 -> 7";
+  } else if (key == '1') {
+    filter = GRAY;
+    msg = "GRAY";
+  } else if (key == '2') {
+    filter = INVERT;
+    msg = "INVERT";
+  } else if (key == '3') {
+    filter = THRESHOLD; arg = 0.7;
+    msg = "THRESHOLD, 0.7";
+  } else if (key == '4') {
+    filter = POSTERIZE; arg = 10;
+    msg = "POSTERIZE, 10";
+  } else if (key == '5') {
+    filter = BLUR; arg = 5;
+    msg = "BLUR, 5";
+  } else if (key == '6') {
+    filter = ERODE;
+    msg = "ERODE";
+  } else if (key == '7') {
+    filter = DILATE;
+    msg = "DILATE";
+  }
+  
+  redraw();
+}
