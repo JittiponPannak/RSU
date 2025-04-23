@@ -1,0 +1,40 @@
+int xd[] = { 0, 1, 1, 1, 0, -1, -1, -1, 0 };
+int yd[] = { 1, 1, 0, -1, -1, -1, 0, 1, 1 };
+size(700 * 2, 471);
+
+PImage og = loadImage("Suriyathep.jpg");
+PImage im = loadImage("Suriyathep.jpg");
+
+im.resize(width / 2, height);
+image(im, width / 2, 0);
+
+int m[][] = new int[width][height];
+
+for (int x = 1; x < width-1; x++) {
+  for (int y = 1; y < height-1; y++) {
+    int a = 0, b = 0;
+    for(int i = 0; i < 8; i++) {
+      float b1 = brightness(get(x+xd[i], y+yd[i]));
+      float b2 = brightness(get(x+xd[i+1], y+yd[i+1]));
+      if (b1 < 128)
+        b++;
+      if (b1 < 128 && b2 > 128)
+        a++; 
+    }
+    if ((b >= 2 && b <= 6) || a == 1)
+        m[x][y] = 1;
+     else
+       m[x][y] = 0;
+  }
+}
+
+for (int x = 1; x < width-1; x++){
+  for (int y = 1; y < height-1; y++) {
+    if (m[x][y] == 1)
+      set(x, y, color(0));
+    else
+      set(x, y, color(255));
+  }
+}
+
+image(og, 0, 0);

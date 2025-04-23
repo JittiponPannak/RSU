@@ -1,0 +1,35 @@
+import java.util.Arrays;
+
+float[] phases = { 0.0, HALF_PI, PI, PI + HALF_PI };
+float[] angles = { 0.0, 0.0, 0.0, 0.0};
+
+void setup() {
+  size(400, 400);
+}
+
+void draw() {
+  background(0);
+  
+  for (int circ = 0; circ < phases.length; circ++) {
+    float phase = phases[circ];
+    float angle = angles[circ] + 0.05;
+    float d = width / 4 + (sin(phase + angle) * width / 4);    
+    float pX = width / 2, pY = height / 2;
+    
+    if (circ == 0) {
+      pX -= d / 2; pY -= d / 2;
+    } else if (circ == 1) {
+      pX += d / 2; pY -= d / 2;
+    } else if (circ == 2) {
+      pX -= d / 2; pY += d / 2;
+    } else if (circ == 3) {
+      pX += d / 2; pY += d / 2;
+    }
+    
+    colorMode(HSB, 360);
+    fill(d, 360, 360);
+    circle(pX, pY, d);
+    
+    angles[circ] = angle;
+  }
+}
