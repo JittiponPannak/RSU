@@ -5,7 +5,6 @@ class Cloud {
   float speed;
   
   Cloud() {
-    randomSeed(frameCount);
     float ratio = random(0.25, 2.5);
     
     sizeX = 96 * ratio;
