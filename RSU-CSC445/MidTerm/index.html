@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang=en>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.5.3/dist/ethers.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@metamask/detect-provider@1.2.0/dist/detect-provider.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.8.1/dist/cdn.min.js" defer></script>
+<script src="abi.js"></script>
+
+<div x-data="{
+	isConnected: false,
+	ethereum: null,
+	account: '',
+	contractAddress: '0x726d370C686b4f4298F7FD6D527423CFfAa453EC',
+	amount: '',
+	balance: ethers.BigNumber.from(0),
+	mytokenBalance: ethers.BigNumber.from(0),
+	transferAddress:'',
+	transferAmount:'',
+	candidates: [],
+	
+	async init () {
+		this.ethereum = await detectEthereumProvider()
+		window.provider = new ethers.providers.Web3Provider(this.ethereum)
+		
+		const detectAccount = async () => {
+			try {
+			    await ethereum.request({
+                    		method: 'wallet_switchEthereumChain',
+                    		params: [{ chainId: '0xAA36A7' }]
+			    });
+			} catch (error) {
+				console.log('Network switch failed:', error)
+			}
+			const accounts = await ethereum.request({ method: 'eth_accounts' })
+			if (accounts.length === 0) {
+				this.isConnected = false
+				return
+			}
+			this.account = accounts[0]
+			this.isConnected = true
+			this.reloadBalance()
+			this.reloadMyTokenBalance()
+		}
+		
+		detectAccount()
+		reloadCandidates()
+
+		this.ethereum.on('accountsChanged', async () => {
+			detectAccount()
+		})
+		setInterval(() => {
+			this.reloadCandidates();
+		}, 5000)
+	},
+	
+	async connect () {
+		await this.ethereum.request({ method: 'eth_requestAccounts' })
+	},
+	
+	async reloadBalance () {
+		this.balance = await window.provider.getBalance(this.account)
+	},
+	
+	async reloadMyTokenBalance () {
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider)
+		
+		this.mytokenBalance = await c.balanceOf(this.account)
+	},
+
+	async reloadCandidates() {
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider)
+		const count = await c.connect(window.provider.getSigner()).candidateCount();
+		await count.wait()
+
+		console.log(count)
+	},
+	
+	async buy () {
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider)
+		const amount = ethers.utils.parseEther(this.amount)
+		const tx = await c.connect(window.provider.getSigner()).buy({
+			from: this.account,
+			value: amount
+		})
+		
+		await tx.wait()
+		
+		this.reloadBalance()
+		this.reloadMyTokenBalance()
+	},
+	
+	async transfer(){
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider)
+		const amount = ethers.utils.parseEther(this.transferAmount)
+		const tx = await c.connect(window.provider.getSigner()).transfer(this.transferAddress,amount)
+		
+		await tx.wait()
+		
+		this.reloadBalance()
+		this.reloadMyTokenBalance()
+	}
+	}">
+
+	<button x-show="!isConnected" @click=connect>Connect</button>
+	<div x-show=isConnected>
+		<p>Account: <span x-text=account></span></p>
+		<p>Contract Address: <span x-text=contractAddress></span></p>
+		<p>Candidates: <span x-text=""></span></p>
+		<p>Balance: <span x-text="ethers.utils.formatEther(balance)"></span></p>
+		<p>
+			Candidates:<input x-model="candidates" />
+			<button @click="transfer">Vote</button>
+		</p>
+	</div>
+</div>
