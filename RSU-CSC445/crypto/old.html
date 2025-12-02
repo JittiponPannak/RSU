@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang=en>
+
+<style>
+	[x-cloak] {
+		display: none !important;
+	}
+
+	.grid-container {
+		display: inline-grid;
+	}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.5.3/dist/ethers.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@metamask/detect-provider@1.2.0/dist/detect-provider.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.8.1/dist/cdn.min.js" defer></script>
+<script src="abi.js"></script>
+
+<div x-data="{
+	isConnected: false,
+	ethereum: null,
+	account: '',
+	contractAddress: '0x47957b67AAC3136ecCb0A64A38c92c32779d32bE',
+	
+	status: 0,
+	status_string: '',
+	isChairPerson: false,
+	isOfficialPerson: false,
+	candidates: [],
+	popularWinner: null,
+	electoralWinner: null,
+	
+	async init () {
+		this.ethereum = await detectEthereumProvider()
+		window.provider = new ethers.providers.Web3Provider(this.ethereum)
+		
+		const detectAccount = async () => {
+			try {
+			    await ethereum.request({
+                    		method: 'wallet_switchEthereumChain',
+                    		params: [{ chainId: '0xAA36A7' }]
+			    });
+			} catch (error) {
+				console.log('Network switch failed:', error)
+			}
+
+			const accounts = await ethereum.request({ method: 'eth_accounts' })
+
+			if (accounts.length === 0) {
+				this.isConnected = false
+				return
+			}
+
+			this.account = accounts[0]
+			this.isConnected = true
+			this.fetchStatus()
+			this.fetchCandidate()
+		}
+		
+		detectAccount()
+
+		this.ethereum.on('accountsChanged', async () => {
+			detectAccount()
+		})
+
+		setInterval(() => {
+			
+		}, 5000)
+	},
+	
+	async connect () {
+		await this.ethereum.request({ method: 'eth_requestAccounts' })
+	},
+	
+	async fetchStatus () {
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const _status = await c.connect(window.provider.getSigner()).getStatus();
+		
+		this.status = _status;
+		this.status_string = [ 'Waiting', 'General Vote', 'Electoral Vote', 'Ended' ][this.status];
+
+		const c2 = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const isChair = await c2.connect(window.provider.getSigner()).isChairPerson();
+		
+		this.isChairPerson = isChair;
+
+		const c3 = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const isOff = await c3.connect(window.provider.getSigner()).isOfficialPerson();
+		
+		this.isOfficialPerson = isOff;
+
+		if (_status == 3) {
+			const c4 = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+			const popular = await c3.connect(window.provider.getSigner()).partyPopularWin();
+			
+			this.popularWinner = popular;
+
+			const c5 = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+			const electoral = await c3.connect(window.provider.getSigner()).partyElectoralWin();
+					
+			this.electoralWinner = electoral;
+		}
+	},
+	async fetchCandidate () {
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const _candidateCount = await c.connect(window.provider.getSigner()).getPartyCount();
+		
+		this.candidates = [];
+
+		for (let i = 0; i < _candidateCount; i++) {
+			const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+			const candidate = await c.connect(window.provider.getSigner()).parties(i);
+			
+			this.candidates.push(candidate);
+			
+			console.log(candidate);
+		}
+
+		return this.candidates;
+	},
+
+	async generalVote (party) {
+		const nid = document.getElementById('national_id_general').value;
+
+		console.log(nid);
+
+		if (nid == '') { 
+			alert('Please enter a valid National ID.');
+			return;
+		}
+
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const v = await c.connect(window.provider.getSigner()).citizenVote(nid, party);
+
+		await v.wait()
+
+		console.log(v);
+		alert('Vote submitted successfully!');
+	},
+
+	async electoralVote (party) {
+		const nid = document.getElementById('national_id_electoral').value;
+
+		console.log(nid);
+
+		if (nid == '') { 
+			alert('Please enter a valid National ID.');
+			return;
+		}
+
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const v = await c.connect(window.provider.getSigner()).electorVote(nid, party);
+
+		await v.wait()
+
+		console.log(v);
+		alert('Vote submitted successfully!');
+	},
+
+	async nextStage ( ) {
+		if (this.status >= 3) {
+			return;
+		}
+
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const v = await c.connect(window.provider.getSigner()).setStatus(this.status + 1);
+
+		await v.wait()
+
+		console.log(v);
+		alert('Stage advanced successfully!');
+	},
+
+	async admin_add_official() {
+		const eid = document.getElementById('admin_add_official_address').value;
+		const est = document.getElementById('admin_add_official_State').value;
+
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const v = await c.connect(window.provider.getSigner()).addOfficial(eid, est);
+
+		await v.wait()
+
+		console.log(v);
+		alert('Admin Added successfully!');
+	},
+	async admin_add_candidate() {
+		const cna = document.getElementById('admin_candidate_name').value;
+		const cim = document.getElementById('admin_candidate_image').value;
+		const vna = document.getElementById('admin_vice_name').value;
+		const vim = document.getElementById('admin_vice_image').value;
+
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const v = await c.connect(window.provider.getSigner()).addParty(cna, cim, vna, vim);
+
+		await v.wait()
+
+		console.log(v);
+		alert('Candidates Added successfully!');
+	},
+	async admin_add_elector() {
+		const eid = document.getElementById('admin_elector_id').value;
+		const est = document.getElementById('admin_elector_state').value;
+		const epa = document.getElementById('admin_elector_party').value;
+
+		const c = new ethers.Contract(this.contractAddress, abi.IERC20, window.provider);
+		const v = await c.connect(window.provider.getSigner()).addElector(eid, est, epa);
+
+		await v.wait()
+
+		console.log(v);
+		alert('Elector Added successfully!');
+	},
+
+	}">
+
+	<button x-show="!isConnected" @click=connect>Connect</button>
+	<div x-show="isConnected" x-cloak>
+		<h2 x-show="!isOfficialPerson">
+			<center>Official Person Only</center>
+		</h2>
+		<div x-show="isOfficialPerson">
+			<p>Account: <span
+					x-text="account + (isChairPerson ? ' (Chairperson)' : '') + (isOfficialPerson ? ' (OfficialPerson)' : '')"></span>
+			</p>
+			<p>Status: <span x-text=status_string></span></p>
+			<div x-show="status == 1 && candidates.length > 0">
+				<center>
+					<h3>General Vote</h3>
+
+					<span>National ID: </span> <input type="number" id="national_id_general">
+
+					<div>
+						<template x-for="(candidate, index) in candidates">
+							<div>
+								<div style="margin: 25px;">
+									<div class="grid-container">
+										<img :src="candidate[1]" width="200"></image>
+										<img :src="candidate[3]" width="200"></image>
+									</div>
+									<div class="grid-container">
+										<span x-text="candidate[0]"></span>
+										&
+										<span x-text="candidate[2]"></span>
+									</div>
+								</div>
+								<button @click=generalVote(index)>Vote</button>
+							</div>
+						</template>
+					</div>
+
+				</center>
+			</div>
+			<div x-show="status == 2 && candidates.length > 0">
+				<center>
+					<h3>Electoral Vote</h3>
+
+					<span>National ID: </span> <input type="number" id="national_id_electoral">
+
+					<div>
+						<template x-for="(candidate, index) in candidates">
+							<div>
+								<div style="margin: 25px;">
+									<div class="grid-container">
+										<img :src="candidate[1]" width="200"></image>
+										<img :src="candidate[3]" width="200"></image>
+									</div>
+									<div class="grid-container">
+										<span x-text="candidate[0]"></span>
+										&
+										<span x-text="candidate[2]"></span>
+									</div>
+								</div>
+								<button @click=electoralVote(index)>Vote</button>
+							</div>
+						</template>
+					</div>
+
+				</center>
+			</div>
+			<div x-show="status == 3">
+				<center>
+					<h3>Vote Finished</h3>
+
+					<hr>
+					<span>Popular Vote Winner: <span x-text="candidates[popularWinner][0]"></span>	&	<span x-text="candidates[popularWinner][2]"></span>
+					<hr>
+					<img :src="candidates[popularWinner][1]" width="200"></image>
+					<img :src="candidates[popularWinner][3]" width="200"></image>
+					<hr>
+					<span>Electoral Vote Winner: <span x-text="candidates[electoralWinner][0]"></span>	&	<span x-text="candidates[electoralWinner][2]"></span>	
+					<hr>
+					<img :src="candidates[electoralWinner][1]" width="200"></image>
+					<img :src="candidates[electoralWinner][3]" width="200"></image>
+					<hr>
+
+					<h1>Thank you for your service!</h1>
+				</center>
+			</div>
+			<div x-show="isChairPerson" x-cloak>
+				<center>
+					<hr style="margin: 100px;">
+					<h1>Admin Panel</h1>
+					<hr style="margin: 50px;">
+
+					<h3>General</h3>
+					<span>
+						<input type="text" id="admin_add_official_address" value="" placeholder="Address">
+						<input type="number" id="admin_add_official_State" value="" placeholder="StateID">
+						<button @click=admin_add_official>Add Official Person</button>
+					</span>
+					<hr style="margin: 50px;">
+					<h3>Party Candidate</h3>
+					<span>
+						<template x-for="(candidate, index) in candidates">
+							<ol>
+								<div style="margin: 25px;">
+									<div class="grid-container">
+										<img :src="candidate[1]" width="200"></image>
+										<img :src="candidate[3]" width="200"></image>
+									</div>
+									<div class="grid-container">
+										<span x-text="candidate[0]"></span>
+										&
+										<span x-text="candidate[2]"></span>
+									</div>
+								</div>
+							</ol>
+							</div>
+						</template>
+						<p>Candidate Name: <input type="text" id="admin_candidate_name" value=""></p>
+						<p>Candidate Image URL: <input type="url" id="admin_candidate_image" value=""></p>
+						<p>Candidate's Vice Name: <input type="text" id="admin_vice_name" value=""></p>
+						<p>Candidate's Vice URL: <input type="url" id="admin_vice_image" value=""></p>
+						<button @click=admin_add_candidate>Add Party</button>
+					</span>
+					<hr style="margin: 50px;">
+					<h3>Electors</h3>
+					<span>
+						<p>Elector's ID: <input type="number" id="admin_elector_id" value=""></p>
+						<p>Elector's State: <input type="text" id="admin_elector_state" value=""></p>
+						<p>Elector's PartyID: <input type="number" id="admin_elector_party" value=""></p>
+						<button @click=admin_add_elector>Add Party</button>
+					</span>
+					<span>
+						<button @click="nextStage">Next Stage</button>
+					</span>
+				</center>
+			</div>
+		</div>
+	</div>
+</div>
