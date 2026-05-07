@@ -352,15 +352,15 @@ function analyzeWasteWithTree(inputText) {
 function generateTreePath(category, text) {
   const path = [];
   
-  // Question 1: Hazard check
-  const hazardKeywords = ["แบตเตอรี่", "สี", "ยา", "เคมี", "ปรอท", "ตะกั่ว", "ไฟ", "สารพิษ", "battery", "chemical", "toxic", "hazard"];
-  const electronicKeywords = ["โทรศัพท์", "คอมพิวเตอร์", "แล็ปท็อป", "จอ", "เครื่องปริ้น", "phone", "laptop", "computer", "electronic", "e-waste"];
-  const organicKeywords = ["อาหาร", "ผัก", "ผลไม้", "ใบไม้", "กิ่งไม้", "food", "vegetable", "fruit", "organic", "leaf"];
-  const recyclableKeywords = ["พลาสติก", "แก้ว", "โลหะ", "กระดาษ", "อลูมิเนียม", "plastic", "glass", "metal", "paper", "aluminum"];
+  // Get keywords from registry instead of hardcoded lists
+  const hazardousKeywords = wasteRegistry.getKeywords("hazardous");
+  const electronicKeywords = wasteRegistry.getKeywords("electronic");
+  const organicKeywords = wasteRegistry.getKeywords("organic");
+  const recyclableKeywords = wasteRegistry.getKeywords("recyclable");
 
   path.push({ question: "ขยะชิ้นนี้คืออะไร?", answer: category.name });
 
-  const isHazardous = hazardKeywords.some(kw => text.includes(kw)) || category.parameters.hazardous;
+  const isHazardous = hazardousKeywords.some(kw => text.includes(kw)) || category.parameters.hazardous;
   path.push({ 
     question: "มีสารพิษหรือเป็นอันตรายต่อสุขภาพหรือไม่?", 
     answer: isHazardous ? "ใช่ ⚠️" : "ไม่ ✓" 

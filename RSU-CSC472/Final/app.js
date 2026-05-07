@@ -23,6 +23,7 @@ const toast         = document.getElementById("toast");
 const keywordSelect = document.getElementById("keyword-select");
 const treeModal     = document.getElementById("tree-modal");
 const treePathContainer = document.getElementById("tree-path-container");
+const failModal     = document.getElementById("fail-modal");
 
 // ---------- Init ----------
 document.addEventListener("DOMContentLoaded", () => {
@@ -169,6 +170,16 @@ function handleAnalyze() {
   setTimeout(() => {
     const combinedText = state.items.join(" ");
     const analysisResult = analyzeWasteWithTree(combinedText);
+
+    state.loading = false;
+    analyzeBtn.disabled = false;
+    analyzeBtn.innerHTML = `<span class="btn-icon">🔍</span> วิเคราะห์ขยะ`;
+
+    if (!analysisResult) {
+      // Show fail modal
+      showFailModal();
+      return;
+    }
 
     state.results = analysisResult.results;
     state.treePath = analysisResult.treePath;
@@ -346,10 +357,25 @@ function closeTreeModal() {
   treeModal.classList.remove("show");
 }
 
+// ---------- Fail Modal ----------
+function showFailModal() {
+  failModal.classList.add("show");
+}
+
+function closeFailModal() {
+  failModal.classList.remove("show");
+}
+
 // Close modal when clicking outside
 treeModal.addEventListener("click", (e) => {
   if (e.target === treeModal) {
     closeTreeModal();
+  }
+});
+
+failModal.addEventListener("click", (e) => {
+  if (e.target === failModal) {
+    closeFailModal();
   }
 });
 
