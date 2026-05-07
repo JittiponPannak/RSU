@@ -1,0 +1,40 @@
+Project: A NFC Android-IOS cross-platform wireless and networkless text exchange and chat application. Developed using Flutter.
+
+Sources:
+	IOS supports Card Emulation (HCE)
+	https://developer.apple.com/support/hce-transactions-in-apps/
+	https://developer.apple.com/documentation/CoreNFC/CardSession
+	Library (But using React-Native)
+	https://github.com/icedevml/react-native-host-card-emulation
+	https://github.com/appidea/react-native-hce/issues/36
+
+Application Status:
+	Idle
+	Reader:	
+	Sender (Card Emulation)
+
+Application Mode:
+	Text Editor
+	Messaging
+
+Messaging Mode:
+	Person/Device ID
+	Group (consist of Person/Device ID)
+
+State Machine:
+	Reader:
+		Waiting for NFC tap
+		Verifying the device
+		Read the data
+	Sender:
+		Waiting for NFC tap
+		Sending verification
+		Send the data
+
+Verification:
+	- Constant Key like Application and Version and device's ID
+
+Goal:
+	An offline experience for an event, board game or a secure
+	personal use that supports and brings together Android and
+	IOS phone users.
