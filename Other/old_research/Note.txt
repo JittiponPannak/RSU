@@ -1,0 +1,10 @@
+Development
+
+IDE : Android Studio
+Programming Language : Kotlin, Java
+
+Reason : Flexibility and possibly a near native support of NFC officially from the Android Studio IDE for an Android operating system itself which could be a better choice than a framework like Flutter with Dart language.
+
+Possible Citations:
+https://en.wikipedia.org/wiki/Android_Studio
+https://developer.android.com/studio/intro
