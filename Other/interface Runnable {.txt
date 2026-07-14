@@ -1,0 +1,78 @@
+interface Runnable {
+    func run() -> string;
+}
+
+mixin Serializable {
+    func toJSON() -> string {
+        return '{"brand":"' + self.brand + '","speed":' + self.speed + '}';
+    }
+}
+
+proto Vehicle {
+    string brand;
+    int    _speed;
+
+    new(string b, int s) {
+        self.brand  = b;
+        self._speed = s;
+    }
+
+    prop int speed {
+        get() -> int { return self._speed; }
+        set(int s) {
+            if (s < 0) { print("speed cannot be negative"); return; }
+            self._speed = s;
+        }
+    }
+
+    __tostring() -> string {
+        return "Vehicle(" + self.brand + ", " + self._speed + "km/h)";
+    }
+}
+
+proto Car extends Vehicle
+          implements Runnable
+          uses Serializable {
+    int fuel;
+
+    new(string b, int s, int f) {
+        Vehicle.new(self, b, s);
+        self.fuel = f;
+    }
+
+    func run() -> string {
+        return self.brand + " running at " + self.speed + "km/h";
+    }
+
+    __call(int extra) -> string {
+        self.speed = self.speed + extra;
+        return self.brand + " boosted to " + self.speed + "km/h";
+    }
+}
+
+// extend เพิ่ม method ให้ Car ทุก instance
+extend Car {
+    func refuel(int amount) -> void {
+        self.fuel = self.fuel + amount;
+        print(self.brand + " refueled +" + amount + "L");
+    }
+}
+
+// ─── Main ────────────────────────────────────
+Car myCar = Car.new("Toyota", 120, 50);
+
+print(myCar);             // → Vehicle(Toyota, 120km/h)
+print(myCar.run());       // → Toyota running at 120km/h
+print(myCar.toJSON());    // → {"brand":"Toyota","speed":120}
+myCar.refuel(30);         // → Toyota refueled +30L
+
+myCar.speed = 150;        // ← setter
+print(myCar(20));         // → Toyota boosted to 170km/h
+
+// patch เฉพาะ myCar
+patch myCar {
+    string nickname = "King";
+    func badge() -> string {
+        return "[ " + self.nickname + " | " + self.brand + " ]";
+    }
+}

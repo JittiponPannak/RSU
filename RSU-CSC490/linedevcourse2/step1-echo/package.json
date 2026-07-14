@@ -1,0 +1,18 @@
+{
+  "name": "line-bot-step1-echo",
+  "version": "1.0.0",
+  "description": "Step 1: LINE Echo Bot สำหรับการเรียนการสอน",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@line/bot-sdk": "^10.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

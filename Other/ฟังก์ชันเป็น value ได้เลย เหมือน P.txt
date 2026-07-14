@@ -1,0 +1,19 @@
+// ฟังก์ชันเป็น value ได้เลย เหมือน Python lambda + Lua function
+func add(int a, int b) -> int {
+    return a + b;
+}
+
+// เก็บในตัวแปรได้
+func operation = add;
+print(operation(3, 4));  // → 7
+
+// ส่งเป็น argument ได้
+func apply(func f, int x, int y) -> int {
+    return f(x, y);
+}
+
+print(apply(add, 10, 5));  // → 15
+
+// Lambda แบบ inline
+func multiply = (int a, int b) -> a * b;
+print(multiply(3, 4));  // → 12

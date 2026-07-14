@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1200"
+   height="405"
+   viewBox="0 0 1200 405"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   sodipodi:docname="richmenu1.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="0.57681581"
+     inkscape:cx="561.70444"
+     inkscape:cy="33.806286"
+     inkscape:window-width="1920"
+     inkscape:window-height="1141"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:0.99;fill:#000004;stroke:#000000;stroke-width:9.87123;stroke-linecap:square;stroke-opacity:0;paint-order:markers stroke fill"
+       id="rect1"
+       width="790.12903"
+       height="395.12878"
+       x="4.9356122"
+       y="4.9356122" />
+    <rect
+       style="opacity:0.99;fill:#000004;stroke:#000000;stroke-width:6.98723;stroke-linecap:square;stroke-opacity:0;paint-order:markers stroke fill"
+       id="rect2"
+       width="393.01279"
+       height="398.01279"
+       x="803.49359"
+       y="3.4936106" />
+    <text
+       xml:space="preserve"
+       style="font-size:286.198px;line-height:1;font-family:'Noto Sans Thai';-inkscape-font-specification:'Noto Sans Thai';text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;opacity:0.99;fill:#000004;stroke:#000000;stroke-width:134.069;stroke-linecap:square;stroke-opacity:0;paint-order:markers stroke fill"
+       x="993.84656"
+       y="304.67279"
+       id="text3"><tspan
+         sodipodi:role="line"
+         id="tspan3"
+         x="993.84656"
+         y="304.67279"
+         style="fill:#ffffff;stroke-width:134.069">B</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:286.198px;line-height:1;font-family:'Noto Sans Thai';-inkscape-font-specification:'Noto Sans Thai';text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;opacity:0.99;fill:#000004;stroke:#000000;stroke-width:134.069;stroke-linecap:square;stroke-opacity:0;paint-order:markers stroke fill"
+       x="400.14316"
+       y="305.10211"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         x="400.14316"
+         y="305.10211"
+         style="fill:#ffffff;stroke-width:134.069">A</tspan></text>
+  </g>
+</svg>

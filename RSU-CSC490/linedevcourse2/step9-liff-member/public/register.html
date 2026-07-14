@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>สมัครสมาชิก</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>สมัครสมาชิก</h1>
+      <p class="subtitle">Step 9 — ลงทะเบียนด้วยบัญชี LINE</p>
+      <p id="status" class="status">กำลังโหลด...</p>
+
+      <form id="register-form" class="hidden">
+        <div class="profile-preview" id="profile-preview"></div>
+
+        <label>
+          ชื่อ-นามสกุล
+          <input id="fullName" type="text" required maxlength="100" />
+        </label>
+
+        <label>
+          เบอร์โทร (ไม่บังคับ)
+          <input id="phone" type="tel" maxlength="20" />
+        </label>
+
+        <button type="submit">ยืนยันสมัครสมาชิก</button>
+      </form>
+
+      <section id="member-info" class="hidden success-box"></section>
+    </main>
+
+    <script src="/config.js"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="/register.js" type="module"></script>
+  </body>
+</html>

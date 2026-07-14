@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>บัตรสมาชิก</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+  <main class="card">
+    <h1>บัตรสมาชิก</h1>
+    <p id="status" class="status">กำลังโหลด...</p>
+
+    <section id="member-card" class="member-card hidden">
+      <div class="tier-badge" id="tier-badge">บรอนซ์</div>
+      <p class="member-no" id="member-no">M000001</p>
+      <p class="member-name" id="member-name">-</p>
+      <p class="member-points">แต้มสะสม: <strong id="member-points">0</strong></p>
+      <button type="button" id="earn-btn" class="secondary">รับแต้มทดลอง +10</button>
+      <button type="button" id="scan-btn" class="secondary">สแกน QR รับแต้ม</button>
+      <button type="button" id="share-btn" class="outline">แชร์บัตรสมาชิกให้เพื่อน</button>
+    </section>
+
+    <p id="not-member" class="hidden">
+      ยังไม่ได้ลงทะเบียน —
+      <a href="/register.html">สมัครสมาชิก</a>
+    </p>
+  </main>
+
+  <script src="/config.js"></script>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="/card.js"></script>
+</body>
+
+</html>

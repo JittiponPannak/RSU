@@ -1,0 +1,18 @@
+{
+  "name": "line-bot-step3-flex",
+  "version": "1.0.0",
+  "description": "Step 3: Flex Message",
+  "type": "module",
+  "main": "index.js",
+  "dependencies": {
+    "@line/bot-sdk": "^10.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

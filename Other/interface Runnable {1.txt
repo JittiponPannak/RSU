@@ -1,0 +1,61 @@
+interface Runnable {
+    func run() -> string;
+}
+
+proto Vehicle {
+    string brand;
+    int    speed;
+
+    new(string b, int s) {
+        self.brand = b;
+        self.speed = s;
+    }
+
+    __tostring() -> string {
+        return "Vehicle(" + self.brand + ")";
+    }
+
+    __eq(Vehicle a, Vehicle b) -> bool {
+        return a.brand == b.brand;
+    }
+}
+
+proto Car extends Vehicle implements Runnable {
+    int fuel;
+
+    new(string b, int s, int f) {
+        Vehicle.new(self, b, s);
+        self.fuel = f;
+    }
+
+    __tostring() -> string {
+        return "Car(" + self.brand + ", fuel=" + self.fuel + "L)";
+    }
+
+    // __call — Car(x) เพิ่ม speed ได้เลย
+    __call(int extra) -> string {
+        self.speed = self.speed + extra;
+        return self.brand + " boosted to " + self.speed + "km/h";
+    }
+
+    func run() -> string {
+        return self.brand + " running at " + self.speed + "km/h";
+    }
+}
+
+// ─── Main ────────────────────────────────────────
+Car myCar = Car.new("Toyota", 120, 50);
+
+print(myCar);            // → Car(Toyota, fuel=50L)   __tostring
+print(myCar.run());      // → Toyota running at 120km/h
+
+// __call
+print(myCar(30));        // → Toyota boosted to 150km/h
+
+// First Class Function
+func action = myCar.run;
+print(action());         // → Toyota running at 150km/h
+
+// __eq
+Car other = Car.new("Toyota", 90, 20);
+print(myCar == other);   // → true  (brand เดียวกัน)
