@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>สั่งซื้อ — LIFF</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>สั่งซื้อสินค้า</h1>
+      <p class="subtitle">Step 8 — ส่งข้อความกลับแชทด้วย liff.sendMessages()</p>
+
+      <p id="status" class="status">กำลังเริ่มต้น LIFF...</p>
+
+      <form id="order-form" class="hidden">
+        <label>
+          สินค้า
+          <select id="item" required>
+            <option value="กาแฟลาเต้">กาแฟลาเต้ — ฿65</option>
+            <option value="ชาเขียว">ชาเขียว — ฿55</option>
+            <option value="ครัวซองต์">ครัวซองต์ — ฿45</option>
+          </select>
+        </label>
+
+        <label>
+          จำนวน
+          <input id="qty" type="number" min="1" max="10" value="1" required />
+        </label>
+
+        <button type="submit" id="submit-btn">ยืนยันสั่งซื้อ</button>
+      </form>
+    </main>
+
+    <script src="/config.js"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="/order.js"></script>
+  </body>
+</html>

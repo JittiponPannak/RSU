@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Step 7 — LIFF Profile</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="card">
+      <h1>LINE Front-end Framework (LIFF)</h1>
+      <p class="subtitle">Step 7 — ดึงข้อมูลโปรไฟล์ผู้ใช้ในแอป LINE</p>
+
+      <p id="status" class="status">กำลังเริ่มต้น LIFF...</p>
+
+      <section id="profile" class="profile hidden"></section>
+
+      <section class="context-box">
+        <h2>liff.getContext()</h2>
+        <pre id="context">-</pre>
+      </section>
+    </main>
+
+    <script src="/config.js"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
