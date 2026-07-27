@@ -9,7 +9,7 @@
 
 import { searchProduct, getAllProducts } from '../data/productDB.js';
 import { calculateCement, calculatePaint, calculateTiles } from '../services/calculator.js';
-import { getSession, clearSession } from '../store/calculatorSession.js';
+import { getSession, startSession, clearSession } from '../store/calculatorSession.js';
 import { createProductCard, createProductCarousel, createCategoryMenu } from '../messages/flexMenu.js';
 import { createCalculatorMenu, createCalculatorResult } from '../messages/flexCalculator.js';
 import { createStoreInfoCard } from '../messages/flexStoreInfo.js';
@@ -46,7 +46,7 @@ export async function handleMessage(client, event) {
   }
 
   // ── 2. เช็ค keyword ตามลำดับ ──
-  const messages = await matchMessage(text);
+  const messages = await matchMessage(text, userId);
   return client.replyMessage({ replyToken: event.replyToken, messages });
 }
 
@@ -54,20 +54,53 @@ export async function handleMessage(client, event) {
 // Keyword matching
 // ──────────────────────────────────────────
 
-async function matchMessage(text) {
+async function matchMessage(text, userId) {
   const lower = text.toLowerCase();
 
   // ── ถาม AI n8n เมื่อพิมพ์ "ถาม: ..." หรือ "...คืออะไร" ──
   if (text.startsWith('ถาม:') || text.startsWith('ถาม: ') || text.startsWith('ถาม ')) {
     const question = text.replace(/^ถาม:\s*|^ถาม\s+/, '').trim();
-    return await askN8N(question);
+    return await askN8N(question, userId);
   }
+
+  /*
 
   if (text.includes('คืออะไร')) {
     return await askN8N(text);
   }
 
-  // เครื่องคำนวณ
+  */
+
+  // เช็คเริ่มคำนวณชนิดต่างๆ (เพื่อรองรับการสั่งเริ่มจากข้อความ/คลิกปุ่มผ่าน Dialogflow ที่ไม่สามารถส่ง postback สำเร็จ)
+  if (lower == 'คำนวณปูน' || lower == 'คำนวณปูนซีเมนต์') {
+    startSession(userId, 'cement');
+    return [
+      {
+        type: 'text',
+        text: '🧱 คำนวณปูนซีเมนต์\n\nกรุณาพิมพ์พื้นที่ที่ต้องการเทพื้น (ตร.ม.)\nเช่น พิมพ์ "20" = 20 ตร.ม.',
+      },
+    ];
+  }
+  if (lower == 'คำนวณสี' || lower == 'คำนวณสีทาบ้าน') {
+    startSession(userId, 'paint');
+    return [
+      {
+        type: 'text',
+        text: '🎨 คำนวณสีทาบ้าน\n\nกรุณาพิมพ์พื้นที่ผนังที่ต้องการทาสี (ตร.ม.)\nเช่น พิมพ์ "50" = 50 ตร.ม.',
+      },
+    ];
+  }
+  if (lower == 'คำนวณกระเบื้อง') {
+    startSession(userId, 'tile');
+    return [
+      {
+        type: 'text',
+        text: '🏗️ คำนวณกระเบื้อง\n\nกรุณาพิมพ์พื้นที่ที่ต้องการปูกระเบื้อง (ตร.ม.)\nเช่น พิมพ์ "30" = 30 ตร.ม.',
+      },
+    ];
+  }
+
+  // เครื่องคำนวณ (แสดงเมนูหลัก)
   if (CALC_KEYWORDS.some((kw) => lower.includes(kw))) {
     return [createCalculatorMenu()];
   }
@@ -80,13 +113,13 @@ async function matchMessage(text) {
   // เวลาเปิด-ปิด
   if (HOURS_KEYWORDS.some((kw) => lower.includes(kw))) {
     return [
-      {
+      /* {
         type: 'text',
         text:
           '🕐 เวลาทำการ\n\n' +
           '📅 จันทร์-เสาร์: 08:00 - 17:00 น.\n' +
           '📅 อาทิตย์: 08:00 - 16:00 น.\n\n'
-      },
+      }, */
     ];
   }
 
@@ -267,10 +300,30 @@ function handleCalculatorInput(userId, text, session) {
 // n8n Webhook / AI Q&A helper
 // ──────────────────────────────────────────
 
-async function askN8N(text) {
+async function askN8N(text, userId) {
   const url = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/line-bot';
 
   console.log(url)
+
+  // Start LINE loading animation if userId is a valid LINE user ID
+  const isLineUserId = userId && /^U[0-9a-f]{32}$/.test(userId);
+  if (isLineUserId && process.env.CHANNEL_ACCESS_TOKEN) {
+    try {
+      await fetch('https://api.line.me/v2/bot/chat/loading/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify({
+          chatId: userId,
+          loadingSeconds: 15
+        })
+      });
+    } catch (err) {
+      console.error('Failed to start LINE loading animation:', err);
+    }
+  }
 
   try {
     const response = await fetch(url, {

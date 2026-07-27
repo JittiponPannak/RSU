@@ -73,7 +73,7 @@ function calcMenuBubble(title, description, calcType, color) {
             type: 'postback',
             label: 'เริ่มคำนวณ',
             data: `action=calc&type=${calcType}`,
-            displayText: `คำนวณ${title.replace(/[^\u0E00-\u0E7F]/g, '')}`, // เอาแค่ภาษาไทย
+            displayText: `${title.replace(/[^\u0E00-\u0E7F]/g, '')}`, // เอาแค่ภาษาไทย
           },
         },
       ],
