@@ -31,7 +31,7 @@ export async function handleDialogflowWebhook(reqBody) {
     reqBody.originalDetectIntentRequest.payload.data
   ) {
     lineEvent = reqBody.originalDetectIntentRequest.payload.data;
-  } 
+  }
   // 2. Detect standard/fallback Dialogflow ES style (where queryText represents the message)
   else if (reqBody.queryResult) {
     const text = reqBody.queryResult.queryText || '';
@@ -50,7 +50,7 @@ export async function handleDialogflowWebhook(reqBody) {
         text: text
       }
     };
-  } 
+  }
   // 3. Detect Dialogflow CX style
   else if (reqBody.intentInfo || reqBody.sessionInfo) {
     const text = reqBody.text || '';
@@ -92,6 +92,7 @@ export async function handleDialogflowWebhook(reqBody) {
   };
 
   try {
+    console.log(mockClient, lineEvent)
     await handleWebhookEvent(mockClient, lineEvent);
   } catch (err) {
     console.error('Error handling Dialogflow webhook event:', err);

@@ -13,6 +13,7 @@ import { getSession, startSession, clearSession } from '../store/calculatorSessi
 import { createProductCard, createProductCarousel, createCategoryMenu } from '../messages/flexMenu.js';
 import { createCalculatorMenu, createCalculatorResult } from '../messages/flexCalculator.js';
 import { createStoreInfoCard } from '../messages/flexStoreInfo.js';
+import { askGemini } from '../services/geminiService.js';
 
 // ──────────────────────────────────────────
 // Keyword patterns (Thai)
@@ -37,18 +38,49 @@ export async function handleMessage(client, event) {
 
   const userId = event.source.userId;
   const text = event.message.text.trim();
+  const replyToken = event.replyToken;
+  const isLineUserId = userId && /^U[0-9a-f]{32}$/.test(userId);
 
   // ── 1. ถ้ามี calculator session ค้างอยู่ ให้จัดการก่อน ──
   const session = getSession(userId);
   if (session) {
     const messages = handleCalculatorInput(userId, text, session);
-    return client.replyMessage({ replyToken: event.replyToken, messages });
+    if (!messages || messages.length === 0) return null;
+    return sendReply(client, replyToken, userId, isLineUserId, messages);
   }
 
   // ── 2. เช็ค keyword ตามลำดับ ──
   const messages = await matchMessage(text, userId);
-  return client.replyMessage({ replyToken: event.replyToken, messages });
+  if (!messages || messages.length === 0) return null;
+  return sendReply(client, replyToken, userId, isLineUserId, messages);
 }
+
+/**
+ * ส่งข้อความตอบกลับ — ใช้ Reply API ก่อน ถ้าล้มเหลวให้ใช้ Push API แทน
+ */
+async function sendReply(client, replyToken, userId, isLineUserId, messages) {
+  try {
+    return await client.replyMessage({ replyToken, messages });
+  } catch (err) {
+    console.error('replyMessage failed, trying push:', err.message ?? err);
+    // fallback to push for real LINE users
+    if (isLineUserId && process.env.CHANNEL_ACCESS_TOKEN) {
+      try {
+        await fetch('https://api.line.me/v2/bot/message/push', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+          },
+          body: JSON.stringify({ to: userId, messages }),
+        });
+      } catch (pushErr) {
+        console.error('Push also failed:', pushErr.message ?? pushErr);
+      }
+    }
+  }
+}
+
 
 // ──────────────────────────────────────────
 // Keyword matching
@@ -60,7 +92,7 @@ async function matchMessage(text, userId) {
   // ── ถาม AI n8n เมื่อพิมพ์ "ถาม: ..." หรือ "...คืออะไร" ──
   if (text.startsWith('ถาม:') || text.startsWith('ถาม: ') || text.startsWith('ถาม ')) {
     const question = text.replace(/^ถาม:\s*|^ถาม\s+/, '').trim();
-    return await askN8N(question, userId);
+    return await askAI(question, userId);
   }
 
   /*
@@ -297,16 +329,13 @@ function handleCalculatorInput(userId, text, session) {
 }
 
 // ──────────────────────────────────────────
-// n8n Webhook / AI Q&A helper
+// Gemini AI Q&A helper
 // ──────────────────────────────────────────
 
-async function askN8N(text, userId) {
-  const url = process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook/line-bot';
-
-  console.log(url)
-
-  // Start LINE loading animation if userId is a valid LINE user ID
+async function askAI(text, userId) {
   const isLineUserId = userId && /^U[0-9a-f]{32}$/.test(userId);
+
+  // ── 1. Start loading animation (valid LINE user only) ──
   if (isLineUserId && process.env.CHANNEL_ACCESS_TOKEN) {
     try {
       await fetch('https://api.line.me/v2/bot/chat/loading/start', {
@@ -315,95 +344,44 @@ async function askN8N(text, userId) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
         },
-        body: JSON.stringify({
-          chatId: userId,
-          loadingSeconds: 15
-        })
+        body: JSON.stringify({ chatId: userId, loadingSeconds: 30 }),
       });
     } catch (err) {
       console.error('Failed to start LINE loading animation:', err);
     }
   }
 
+  // ── 2. Call Gemini ──
+  let replyText;
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query: text }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`n8n responded with status ${response.status}`);
-    }
-
-    const responseText = await response.text();
-    console.log('n8n raw response:', responseText);
-
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      data = responseText;
-    }
-
-    let replyText = '';
-
-    if (typeof data === 'string') {
-      replyText = data;
-    } else if (data && typeof data.reply === 'string') {
-      replyText = data.reply;
-    } else if (data && typeof data.response === 'string') {
-      replyText = data.response;
-    } else if (data && typeof data.output === 'string') {
-      replyText = data.output;
-    } else if (data && typeof data.text === 'string') {
-      replyText = data.text;
-    } else if (data && typeof data.message === 'string') {
-      replyText = data.message;
-    } else if (data && typeof data.output === 'object') {
-      // Handle nested output object from n8n AI node
-      const nested = data.output;
-      if (typeof nested.text === 'string') {
-        replyText = nested.text;
-      } else {
-        replyText = JSON.stringify(nested);
-      }
-    } else if (Array.isArray(data) && data.length > 0) {
-      // If it's an array, extract from first element
-      const first = data[0];
-      if (typeof first === 'string') {
-        replyText = first;
-      } else if (first && typeof first.output === 'string') {
-        replyText = first.output;
-      } else if (first && typeof first.text === 'string') {
-        replyText = first.text;
-      } else if (first && typeof first.message === 'string') {
-        replyText = first.message;
-      } else {
-        replyText = JSON.stringify(first);
-      }
-    } else {
-      // If object, try to extract first string value
-      const values = Object.values(data);
-      const strVal = values.find(v => typeof v === 'string');
-      if (strVal) {
-        replyText = strVal;
-      } else {
-        replyText = JSON.stringify(data);
-      }
-    }
-
-    return [{ type: 'text', text: replyText || 'ไม่พบคำตอบจาก AI' }];
+    replyText = await askGemini(text);
   } catch (err) {
-    console.error('Error calling n8n:', err);
-    return [
-      {
-        type: 'text',
-        text: 'ขออภัยครับ ไม่สามารถเชื่อมต่อกับ AI ในขณะนี้ได้ 😅',
-      },
-    ];
+    console.error('Error calling Gemini:', err);
+    replyText = 'ขออภัยครับ ไม่สามารถเชื่อมต่อกับ AI ในขณะนี้ได้ 😅';
   }
+
+  const messages = [{ type: 'text', text: replyText || 'ไม่พบคำตอบจาก AI' }];
+
+  // ── 3. Use Push API for real LINE users (avoids replyToken timeout) ──
+  if (isLineUserId && process.env.CHANNEL_ACCESS_TOKEN) {
+    try {
+      await fetch('https://api.line.me/v2/bot/message/push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify({ to: userId, messages }),
+      });
+      // Return empty array — message already sent via push
+      return [];
+    } catch (err) {
+      console.error('Failed to push LINE message, falling back to reply:', err);
+    }
+  }
+
+  // ── 4. Fallback: return messages for replyMessage (Dialogflow / test path) ──
+  return messages;
 }
+
 
