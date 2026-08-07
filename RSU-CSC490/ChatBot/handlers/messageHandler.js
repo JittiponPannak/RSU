@@ -1,0 +1,387 @@
+/**
+ * Message Handler — จัดการข้อความจากผู้ใช้
+ *
+ * ฟีเจอร์หลัก:
+ *  1. เครื่องคำนวณวัสดุ (calculator session flow)
+ *  2. ค้นหาสินค้า / เช็คราคา
+ *  3. ข้อมูลร้าน & FAQ
+ */
+
+import { searchProduct, getAllProducts } from '../data/productDB.js';
+import { calculateCement, calculatePaint, calculateTiles } from '../services/calculator.js';
+import { getSession, startSession, clearSession } from '../store/calculatorSession.js';
+import { createProductCard, createProductCarousel, createCategoryMenu } from '../messages/flexMenu.js';
+import { createCalculatorMenu, createCalculatorResult } from '../messages/flexCalculator.js';
+import { createStoreInfoCard } from '../messages/flexStoreInfo.js';
+import { askGemini } from '../services/geminiService.js';
+
+// ──────────────────────────────────────────
+// Keyword patterns (Thai)
+// ──────────────────────────────────────────
+
+const CALC_KEYWORDS = ['คำนวณ', 'calculator', 'เครื่องคิด'];
+const PRODUCT_KEYWORDS = ['สินค้า', 'สินค้าทั้งหมด', 'แคตตาล็อก'];
+const PRICE_PATTERNS = [/ราคา(.+)/, /(.+)ราคาเท่าไ(ห?)ร/, /(.+)กี่บาท/];
+const HAVE_PATTERNS = [/มี(.+)ไหม/, /มี(.+)มั้ย/, /ขาย(.+)ไหม/, /หา(.+)/];
+
+const STORE_INFO_KEYWORDS = ['ร้าน', 'ที่อยู่', 'แผนที่', 'อยู่ไหน', 'อยู่ที่ไหน'];
+const HOURS_KEYWORDS = ['เปิด', 'ปิด', 'เวลา', 'กี่โมง', 'เปิดกี่โมง', 'ปิดกี่โมง'];
+const DELIVERY_KEYWORDS = ['ส่ง', 'จัดส่ง', 'ส่งของ', 'delivery', 'ส่งสินค้า'];
+const CONTACT_KEYWORDS = ['โทร', 'เบอร์', 'ติดต่อ', 'โทรศัพท์'];
+
+// ──────────────────────────────────────────
+// Main handler
+// ──────────────────────────────────────────
+
+export async function handleMessage(client, event) {
+  if (event.message.type !== 'text') return null;
+
+  const userId = event.source.userId;
+  const text = event.message.text.trim();
+  const replyToken = event.replyToken;
+  const isLineUserId = userId && /^U[0-9a-f]{32}$/.test(userId);
+
+  // ── 1. ถ้ามี calculator session ค้างอยู่ ให้จัดการก่อน ──
+  const session = getSession(userId);
+  if (session) {
+    const messages = handleCalculatorInput(userId, text, session);
+    if (!messages || messages.length === 0) return null;
+    return sendReply(client, replyToken, userId, isLineUserId, messages);
+  }
+
+  // ── 2. เช็ค keyword ตามลำดับ ──
+  const messages = await matchMessage(text, userId);
+  if (!messages || messages.length === 0) return null;
+  return sendReply(client, replyToken, userId, isLineUserId, messages);
+}
+
+/**
+ * ส่งข้อความตอบกลับ — ใช้ Reply API ก่อน ถ้าล้มเหลวให้ใช้ Push API แทน
+ */
+async function sendReply(client, replyToken, userId, isLineUserId, messages) {
+  try {
+    return await client.replyMessage({ replyToken, messages });
+  } catch (err) {
+    console.error('replyMessage failed, trying push:', err.message ?? err);
+    // fallback to push for real LINE users
+    if (isLineUserId && process.env.CHANNEL_ACCESS_TOKEN) {
+      try {
+        await fetch('https://api.line.me/v2/bot/message/push', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+          },
+          body: JSON.stringify({ to: userId, messages }),
+        });
+      } catch (pushErr) {
+        console.error('Push also failed:', pushErr.message ?? pushErr);
+      }
+    }
+  }
+}
+
+
+// ──────────────────────────────────────────
+// Keyword matching
+// ──────────────────────────────────────────
+
+async function matchMessage(text, userId) {
+  const lower = text.toLowerCase();
+
+  // ── ถาม AI n8n เมื่อพิมพ์ "ถาม: ..." หรือ "...คืออะไร" ──
+  if (text.startsWith('ถาม:') || text.startsWith('ถาม: ') || text.startsWith('ถาม ')) {
+    const question = text.replace(/^ถาม:\s*|^ถาม\s+/, '').trim();
+    return await askAI(question, userId);
+  }
+
+  /*
+
+  if (text.includes('คืออะไร')) {
+    return await askN8N(text);
+  }
+
+  */
+
+  // เช็คเริ่มคำนวณชนิดต่างๆ (เพื่อรองรับการสั่งเริ่มจากข้อความ/คลิกปุ่มผ่าน Dialogflow ที่ไม่สามารถส่ง postback สำเร็จ)
+  if (lower == 'คำนวณปูน' || lower == 'คำนวณปูนซีเมนต์') {
+    startSession(userId, 'cement');
+    return [
+      {
+        type: 'text',
+        text: '🧱 คำนวณปูนซีเมนต์\n\nกรุณาพิมพ์พื้นที่ที่ต้องการเทพื้น (ตร.ม.)\nเช่น พิมพ์ "20" = 20 ตร.ม.',
+      },
+    ];
+  }
+  if (lower == 'คำนวณสี' || lower == 'คำนวณสีทาบ้าน') {
+    startSession(userId, 'paint');
+    return [
+      {
+        type: 'text',
+        text: '🎨 คำนวณสีทาบ้าน\n\nกรุณาพิมพ์พื้นที่ผนังที่ต้องการทาสี (ตร.ม.)\nเช่น พิมพ์ "50" = 50 ตร.ม.',
+      },
+    ];
+  }
+  if (lower == 'คำนวณกระเบื้อง') {
+    startSession(userId, 'tile');
+    return [
+      {
+        type: 'text',
+        text: '🏗️ คำนวณกระเบื้อง\n\nกรุณาพิมพ์พื้นที่ที่ต้องการปูกระเบื้อง (ตร.ม.)\nเช่น พิมพ์ "30" = 30 ตร.ม.',
+      },
+    ];
+  }
+
+  // เครื่องคำนวณ (แสดงเมนูหลัก)
+  if (CALC_KEYWORDS.some((kw) => lower.includes(kw))) {
+    return [createCalculatorMenu()];
+  }
+
+  // ข้อมูลร้าน
+  if (STORE_INFO_KEYWORDS.some((kw) => lower.includes(kw))) {
+    return [createStoreInfoCard()];
+  }
+
+  // เวลาเปิด-ปิด
+  if (HOURS_KEYWORDS.some((kw) => lower.includes(kw))) {
+    return [
+      /* {
+        type: 'text',
+        text:
+          '🕐 เวลาทำการ\n\n' +
+          '📅 จันทร์-เสาร์: 08:00 - 17:00 น.\n' +
+          '📅 อาทิตย์: 08:00 - 16:00 น.\n\n'
+      }, */
+    ];
+  }
+
+  // จัดส่ง
+  if (DELIVERY_KEYWORDS.some((kw) => lower.includes(kw))) {
+    return [
+      {
+        type: 'text',
+        text:
+          '🚛 บริการจัดส่ง\n\n' +
+          '✅ จัดส่งในรัศมี 20 กม. ฟรี! (สั่งขั้นต่ำ ฿2,000)\n' +
+          '✅ เกิน 20 กม. คิดค่าส่งตามระยะทาง\n' +
+          '✅ จัดส่งภายใน 1-2 วันทำการ\n\n' +
+          '📞 โทรสอบถาม: 099-309-5171',
+      },
+    ];
+  }
+
+  // ติดต่อ
+  if (CONTACT_KEYWORDS.some((kw) => lower.includes(kw))) {
+    return [
+      {
+        type: 'text',
+        text:
+          '📞 ช่องทางติดต่อ\n\n' +
+          '☎️ โทร: 099-309-5171\n' +
+          '📱 LINE: @jittiponhardware\n' +
+          '📍 189/6 9 ถนนติวานนท์ - ปทุมธานี, ตำบล บางกะดี อำเภอเมืองปทุมธานี 12000',
+      },
+    ];
+  }
+
+  // ค้นหาสินค้าจาก pattern "ราคา..."
+  for (const pattern of PRICE_PATTERNS) {
+    const match = text.match(pattern);
+    if (match) {
+      const query = match[1].trim();
+      return searchAndReply(query);
+    }
+  }
+
+  // ค้นหาสินค้าจาก pattern "มี...ไหม"
+  for (const pattern of HAVE_PATTERNS) {
+    const match = text.match(pattern);
+    if (match) {
+      const query = match[1].trim();
+      return searchAndReply(query);
+    }
+  }
+
+  // แสดงหมวดหมู่สินค้า
+  if (PRODUCT_KEYWORDS.some((kw) => lower.includes(kw))) {
+    return [createCategoryMenu()];
+  }
+
+  // ช่วยเหลือ
+  if (lower === 'ช่วยเหลือ' || lower === 'help') {
+    return [
+      {
+        type: 'text',
+        text: [
+          '🏪 ร้านจิตติภณ ต้าวัสดุ',
+          '━━━━━━━━━━━━━',
+          '📌 คำสั่งที่ใช้ได้:',
+          '',
+          '🧮 "คำนวณ" — เครื่องคำนวณวัสดุ',
+          '   (ปูน / สี / กระเบื้อง)',
+          '',
+          '🔍 "มี...ไหม" — ค้นหาสินค้า',
+          '   เช่น "มีค้อนไหม" "ราคาปูน"',
+          '',
+          '🛒 "สินค้า" — เลือกดูสินค้าตามหมวดหมู่',
+          '',
+          '🤖 "ถาม: [คำถาม]" — ถาม AI',
+          '   เช่น "ถาม: ปูนคืออะไร"',
+          '',
+          '📍 "ร้าน" — ข้อมูลร้าน / แผนที่',
+          '🕐 "เปิดกี่โมง" — เวลาทำการ',
+          '🚛 "จัดส่ง" — นโยบายจัดส่ง',
+          '📞 "ติดต่อ" — ช่องทางติดต่อ',
+        ].join('\n'),
+      },
+    ];
+  }
+
+  // สวัสดี / ทักทาย
+  if (['สวัสดี', 'หวัดดี', 'ดี', 'hi', 'hello'].some((w) => lower === w)) {
+    return [
+      {
+        type: 'text',
+        text:
+          'สวัสดีครับ! 🏪 ยินดีต้อนรับสู่ร้านจิตติภณ ต้าวัสดุ\n\n' +
+          'พิมพ์ "ช่วยเหลือ" เพื่อดูคำสั่งที่ใช้ได้ครับ',
+      },
+    ];
+  }
+
+  // ไม่ตรงอะไรเลย → ลองค้นหาสินค้าจากข้อความ
+  const found = searchProduct(text);
+  if (found.length > 0) {
+    return found.length === 1
+      ? [createProductCard(found[0])]
+      : [createProductCarousel(found)];
+  }
+
+  // fallback
+  return [
+    {
+      type: 'text',
+      text: 'ขออภัยครับ ไม่เข้าใจคำสั่ง 😅\nพิมพ์ "ช่วยเหลือ" เพื่อดูคำสั่งที่ใช้ได้ครับ',
+    },
+  ];
+}
+
+// ──────────────────────────────────────────
+// Product search helper
+// ──────────────────────────────────────────
+
+function searchAndReply(query) {
+  const results = searchProduct(query);
+  if (results.length === 0) {
+    return [
+      {
+        type: 'text',
+        text: `ขออภัยครับ ไม่พบสินค้า "${query}" ในระบบ 😅\nลองพิมพ์ "สินค้า" เพื่อดูสินค้าทั้งหมดครับ`,
+      },
+    ];
+  }
+  if (results.length === 1) {
+    return [createProductCard(results[0])];
+  }
+  return [createProductCarousel(results)];
+}
+
+// ──────────────────────────────────────────
+// Calculator session handler
+// ──────────────────────────────────────────
+
+function handleCalculatorInput(userId, text, session) {
+  // ผู้ใช้พิมพ์ "ยกเลิก" ระหว่างคำนวณ
+  if (text === 'ยกเลิก' || text === 'cancel') {
+    clearSession(userId);
+    return [{ type: 'text', text: 'ยกเลิกการคำนวณแล้วครับ 👌' }];
+  }
+
+  const num = parseFloat(text);
+  if (isNaN(num) || num <= 0) {
+    return [
+      {
+        type: 'text',
+        text: 'กรุณาพิมพ์ตัวเลขที่ถูกต้อง (มากกว่า 0) ครับ\nหรือพิมพ์ "ยกเลิก" เพื่อยกเลิก',
+      },
+    ];
+  }
+
+  let result;
+
+  switch (session.type) {
+    case 'cement':
+      result = calculateCement(num);
+      break;
+    case 'paint':
+      result = calculatePaint(num);
+      break;
+    case 'tile':
+      result = calculateTiles(num);
+      break;
+    default:
+      clearSession(userId);
+      return [{ type: 'text', text: 'เกิดข้อผิดพลาด กรุณาลองใหม่ครับ' }];
+  }
+
+  clearSession(userId);
+  return [createCalculatorResult(result)];
+}
+
+// ──────────────────────────────────────────
+// Gemini AI Q&A helper
+// ──────────────────────────────────────────
+
+async function askAI(text, userId) {
+  const isLineUserId = userId && /^U[0-9a-f]{32}$/.test(userId);
+
+  // ── 1. Start loading animation (valid LINE user only) ──
+  if (isLineUserId && process.env.CHANNEL_ACCESS_TOKEN) {
+    try {
+      await fetch('https://api.line.me/v2/bot/chat/loading/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify({ chatId: userId, loadingSeconds: 30 }),
+      });
+    } catch (err) {
+      console.error('Failed to start LINE loading animation:', err);
+    }
+  }
+
+  // ── 2. Call Gemini ──
+  let replyText;
+  try {
+    replyText = await askGemini(text);
+  } catch (err) {
+    console.error('Error calling Gemini:', err);
+    replyText = 'ขออภัยครับ ไม่สามารถเชื่อมต่อกับ AI ในขณะนี้ได้ 😅';
+  }
+
+  const messages = [{ type: 'text', text: replyText || 'ไม่พบคำตอบจาก AI' }];
+
+  // ── 3. Use Push API for real LINE users (avoids replyToken timeout) ──
+  if (isLineUserId && process.env.CHANNEL_ACCESS_TOKEN) {
+    try {
+      await fetch('https://api.line.me/v2/bot/message/push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.CHANNEL_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify({ to: userId, messages }),
+      });
+      // Return empty array — message already sent via push
+      return [];
+    } catch (err) {
+      console.error('Failed to push LINE message, falling back to reply:', err);
+    }
+  }
+
+  // ── 4. Fallback: return messages for replyMessage (Dialogflow / test path) ──
+  return messages;
+}
+
+

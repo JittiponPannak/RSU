@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LIFF Digital Business Card — RSU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <!-- LIFF SDK -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🪪 Digital Business Card</h1>
+      <p>ระบบสร้างนามบัตรดิจิทัลด้วย LIFF SDK</p>
+    </div>
+
+    <!-- 3.1 การแสดงข้อมูลโปรไฟล์ผู้ใช้ (liff.getProfile()) -->
+    <div class="user-profile-banner">
+      <img id="user-profile-avatar" class="user-profile-avatar" src="assets/se92mL7ZPYkjtTvw3RSPbw==.jpg" alt="Profile Picture" />
+      <div class="user-profile-info">
+        <h2 id="user-welcome-title">สวัสดี <span id="user-display-name">ผู้ใช้งาน</span></h2>
+        <p id="user-status-text">ยินดีต้อนรับสู่ระบบ LIFF Application</p>
+      </div>
+    </div>
+
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab('user')">นามบัตรตัวเอง</button>
+      <button class="tab-btn" onclick="switchTab('nera')">นามบัตร อ.เนร</button>
+      <button class="tab-btn" onclick="switchTab('qr')">📷 Scan QR</button>
+    </div>
+
+    <!-- TAB 1: USER BUSINESS CARD (3.2) -->
+    <div id="tab-user" class="tab-content active">
+      <div id="liff-status" class="status-badge">กำลังโหลดข้อมูลโปรไฟล์...</div>
+
+      <!-- Preview Card -->
+      <div class="card-preview">
+        <div class="card-preview-header">
+          <span>🪪 DIGITAL BUSINESS CARD</span>
+          <h3 id="prev-name">กำลังโหลด...</h3>
+        </div>
+        <img id="prev-avatar" class="card-preview-hero" src="" alt="Profile Picture" />
+        <div class="card-preview-body">
+          <div class="info-group">
+            <label>🆔 รหัสนักศึกษา</label>
+            <p id="prev-student-id">6606405</p>
+          </div>
+          <div class="divider"></div>
+          <div class="info-group">
+            <label>🎓 หลักสูตรที่เรียน</label>
+            <p id="prev-major">เทคโนโลยีสารสนเทศ (IT)</p>
+          </div>
+          <div class="divider"></div>
+          <div class="info-group">
+            <label>🏫 สถาบันการศึกษา</label>
+            <p style="font-size: 0.8rem; font-weight: 500; color: #475569;">วิทยาลัยนวัตกรรมดิจิทัลเทคโนโลยี
+              มหาวิทยาลัยรังสิต</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inputs for user customization -->
+      <div class="form-group">
+        <label for="input-student-id">รหัสนักศึกษา (Student ID)</label>
+        <input type="text" id="input-student-id" class="form-input" placeholder="ระบุรหัสนักศึกษา เช่น 650123456"
+          value="6606405" oninput="updateUserPreview()" />
+      </div>
+
+      <div class="form-group">
+        <label for="input-major">หลักสูตร / สาขาวิชา (Major / Program)</label>
+        <input type="text" id="input-major" class="form-input" placeholder="ระบุสาขาวิชา เช่น เทคโนโลยีสารสนเทศ"
+          value="เทคโนโลยีสารสนเทศ (IT)" oninput="updateUserPreview()" />
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="sendUserCard()">📤 Send My Card (ส่งนามบัตรตัวเอง)</button>
+        <button class="btn btn-secondary" onclick="shareUserCard()">🔗 แชร์นามบัตรให้เพื่อน (shareTargetPicker)</button>
+      </div>
+    </div>
+
+    <!-- TAB 2: AJARN NERA BUSINESS CARD (3.3) -->
+    <div id="tab-nera" class="tab-content">
+      <!-- Preview Card -->
+      <div class="card-preview">
+        <img class="card-preview-hero" src="assets/RSUDIT.png" alt="อ.วุฒิพงษ์ ชินศรี" />
+        <div class="card-preview-body">
+          <h3 style="font-size: 1.25rem; font-weight: 700;">วุฒิพงษ์ ชินศรี</h3>
+          <p style="color: #2563eb; font-weight: 700; font-size: 0.9rem; margin-top: 2px;">อาจารย์ ม.รังสิต</p>
+          <div class="divider"></div>
+          <p style="font-size: 0.8rem; color: #64748b;">วิทยาลัยนวัตกรรมดิจิทัลเทคโนโลยี มหาวิทยาลัยรังสิต</p>
+          <div style="margin-top: 15px;">
+            <a href="https://wutthipong.info" target="_blank"
+              style="display: block; width: 100%; text-align: center; background: #2563eb; color: #fff; text-decoration: none; padding: 10px; border-radius: 10px; font-weight: 600; font-size: 0.9rem;">🌐
+              Website: wutthipong.info</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="sendNeraCard()">📤 ส่งนามบัตร อ.เนร เข้าแชท</button>
+        <button class="btn btn-secondary" onclick="shareNeraCard()">🔗 Share Coach Card (แชร์นามบัตร อ.เนร)</button>
+      </div>
+    </div>
+
+    <!-- TAB 3: QR CODE SCANNER (3.4) -->
+    <div id="tab-qr" class="tab-content">
+      <div class="card-preview" style="padding: 24px; text-align: center; background: #1e293b; color: #fff;">
+        <div style="font-size: 3.5rem; margin-bottom: 12px;">📷</div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #f8fafc; margin-bottom: 8px;">ระบบสแกน QR Code / Barcode</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">กดปุ่ม "Scan QR Code" ด้านล่างเพื่อเปิดกล้องสแกนด้วย liff.scanCodeV2()</p>
+
+        <button class="btn btn-primary" style="background: linear-gradient(135deg, #06c755, #05b34c);" onclick="scanQRCode()">
+          📷 Scan QR Code
+        </button>
+
+        <!-- Scan Result Box (3.4) -->
+        <div id="scan-result-box" class="scan-result-box">
+          <div class="scan-result-title">✅ ผลลัพธ์จากการสแกน (Scanned Text/URL):</div>
+          <div id="scan-result-value" class="scan-result-value">-</div>
+          <button class="btn btn-secondary" style="margin-top: 12px; padding: 10px; font-size: 0.85rem;" onclick="sendScanResultToChat()">
+            💬 ส่งผลการสแกนเข้าห้องแชท (sendMessages)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
