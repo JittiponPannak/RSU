@@ -1,0 +1,6 @@
+[submodule "Collaborate/maintenance-system"]
+	path = Collaborate/maintenance-system
+	url = https://github.com/SivaritATS/maintenance-system
+[submodule "Collaborate/MateriaBot-LineOA-bot"]
+	path = Collaborate/MateriaBot-LineOA-bot
+	url = https://github.com/pxndpp/MateriaBot-LineOA-bot
